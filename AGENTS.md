@@ -19,11 +19,18 @@ The project is **MIT licensed**. See [LICENSE](./LICENSE).
 - **Results collector** — gathers runtime outputs, quality signals, and degradation metrics from each run.
 - **Reporting** — aggregates and renders benchmark results for comparison across runtimes and session scales.
 
+## Git Workflow
+
+1. **Push to a branch**: Create a feature branch from `main`, push it to the remote, and open a PR against `main`.
+2. **Enable auto-merge**: Enable auto-merge on the PR so it merges to `main` automatically once any checks pass. No manual merge step is required.
+3. **CI checks**: CI checks are not configured yet but may be added in the future. When they are, auto-merge will gate on them automatically — no workflow change needed.
+
 ## Contributing
 
 1. **Fork** the repository and create a feature branch from `main`.
 2. Make your changes, keeping **PRs focused and small**.
 3. **Open a PR** against `main` describing the change.
+4. **Enable auto-merge** on the PR so it merges to `main` automatically once checks pass — no manual reviewer-merge step (see [Git Workflow](#git-workflow)).
 
 ### Code Style & PR Expectations
 
@@ -33,7 +40,7 @@ The project is **MIT licensed**. See [LICENSE](./LICENSE).
 
 ## CI/CD
 
-**No CI/CD pipeline is configured yet.** There is no automated build, test, or lint pipeline on this repository. **Reviewers validate builds and tests locally before merge** — ensure your change builds and passes locally before requesting review.
+**No CI/CD pipeline is configured yet.** There is no automated build, test, or lint pipeline on this repository. Auto-merge is enabled on PRs; when CI checks are added in the future, auto-merge will gate on them automatically. Until then, ensure your change builds and passes locally before opening a PR.
 
 ## License
 
