@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "almm-adapter"
+version = "1.0.0"
+description = "ALMM RuntimeAdapter contract, reference adapter, and conformance suite"
+requires-python = ">=3.11"
+license = "MIT"
+
+
+[project.optional-dependencies]
+dev = ["coverage>=7.10", "ruff>=0.9", "build>=1.2"]
+[project.scripts]
+almm-adapter = "almm_adapter.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["almm_adapter*"]
+
+
+[tool.coverage.run]
+source = ["almm_adapter"]
+branch = true
+patch = ["subprocess"]
+sigterm = true
+
+[tool.coverage.report]
+fail_under = 80
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
