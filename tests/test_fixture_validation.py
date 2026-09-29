@@ -69,6 +69,7 @@ class FixtureValidationTests(unittest.TestCase):
                 self.fixture = valid_fixture()
                 self.fixture[path] = value
                 self.reject(path)
+        self.fixture = valid_fixture()
         del self.fixture['sessions'][0]['turns'][0]['topicId']
         self.reject('topicId')
 
@@ -205,3 +206,36 @@ class FixtureValidationTests(unittest.TestCase):
         self.fixture = valid_fixture()
         self.fixture['probes'][0]['answerability'] = 1
         self.reject('answerability')
+
+    def test_rejects_unknown_probe_evidence_and_empty_answers(self):
+        self.fixture['probes'][0]['expected']['requiredFactIds'] = ['missing']
+        self.reject('requiredFactIds')
+        self.fixture = valid_fixture()
+        self.fixture['probes'][0]['expected']['acceptedAnswers'] = []
+        self.reject('acceptedAnswers')
+
+    def test_rejects_unintroduced_facts_and_missing_replacement(self):
+        self.fixture['sessions'][0]['turns'][0]['introducedFactIds'] = []
+        self.reject('introducedAt')
+        self.fixture = valid_fixture()
+        self.fixture['facts'][0].update(state='superseded', invalidatedAt='t-0002-01')
+        self.reject('replacement')
+
+    def test_rejects_cross_session_reasoning_with_scalar_answer(self):
+        self.fixture['probes'][0]['ability'] = 'cross-session-reasoning'
+        self.reject('matchType')
+
+    def test_rejects_malformed_nested_shapes(self):
+        for field, value in [('acceptedAnswers', 'Oslo'), ('requiredFactIds', [{}]),
+                             ('forbiddenFactIds', ['f-0001', 'f-0001'])]:
+            with self.subTest(field=field):
+                self.fixture = valid_fixture()
+                self.fixture['probes'][0]['expected'][field] = value
+                self.reject(field)
+
+    def test_rejects_non_iso_or_timezone_free_timestamp(self):
+        for value in ('not-a-date', '2025-01-01T00:00:00'):
+            with self.subTest(value=value):
+                self.fixture = valid_fixture()
+                self.fixture['sessions'][0]['timestamp'] = value
+                self.reject('timestamp')

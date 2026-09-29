@@ -1,4 +1,6 @@
 import copy
+import contextlib
+import io
 import hashlib
 import json
 from pathlib import Path
@@ -6,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from almm_fixture.engine import generate, canonical_json, adapter_view
 from almm_fixture.validation import SchemaValidator
@@ -101,6 +104,23 @@ class FixtureTests(unittest.TestCase):
             self.assertIn('error', result.stderr.lower())
             self.assertEqual(result.stdout, '')
 
+    def test_generation_rejects_inconsistent_answers_without_emitting(self):
+        from almm_fixture.__main__ import main
+        from almm_fixture.engine import ProbePlacer
+        original = ProbePlacer.place
+        def corrupt(placer, scale, anchors):
+            probes = original(placer, scale, anchors)
+            probes[0]['expected']['acceptedAnswers'] = ['WRONG']
+            return probes
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'invalid.json'
+            stderr = io.StringIO()
+            with patch.object(ProbePlacer, 'place', corrupt), contextlib.redirect_stderr(stderr):
+                code = main(['generate', '--sessions', '10', '--seed', '42', '--output', str(output)])
+            self.assertEqual(code, 1)
+            self.assertFalse(output.exists())
+            self.assertIn('acceptedAnswers', stderr.getvalue())
+
     def test_held_out_requires_private_storage_and_distinct_seed(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -121,6 +141,27 @@ class FixtureTests(unittest.TestCase):
             self.assertEqual(((output / 'scorer.json').stat().st_mode & 0o777), 0o600)
             rerun = subprocess.run(command, capture_output=True, text=True)
             self.assertNotEqual(rerun.returncode, 0)  # immutable, never overwrite fixture versions
+
+    def test_held_out_rejects_other_checkouts_and_symlinked_paths(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            checkout = root / 'public'
+            checkout.mkdir(mode=0o700)
+            (checkout / '.git').mkdir()
+            private = root / 'private'
+            private.mkdir(mode=0o700)
+            seed = private / 'seed.json'
+            seed.write_text('{"seed":1000000042}')
+            seed.chmod(0o600)
+            link = private / 'link'
+            link.symlink_to(checkout, target_is_directory=True)
+            for target in (checkout / 'held', link / 'held'):
+                result = subprocess.run([
+                    sys.executable, '-m', 'almm_fixture', 'generate', '--sessions', '10',
+                    '--held-out-seed-file', str(seed), '--output', str(target)],
+                    capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse((checkout / 'held').exists())
 
     def test_public_seed_range_and_invalid_scale(self):
         for seed, scale in ((-1, 10), (1000000000, 10), (True, 10), (42, 11)):
