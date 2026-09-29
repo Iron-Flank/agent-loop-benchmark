@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "almm-custom-adapter"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = ["almm-adapter==1.0.0"]
+
+[tool.setuptools]
+py-modules = ["adapter"]
