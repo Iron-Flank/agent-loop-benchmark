@@ -1,0 +1,765 @@
+{
+  "calibrationSetId": "almm-calibration-1.0.0",
+  "probesSha256": "b881d3a250edcfbba967015bd4d2ff36a284b5d7a1ec41b569e584d6b2f14430",
+  "reviewedAt": "2026-09-30T01:56:16Z",
+  "reviewMethod": "Second manual pass over every question, evidence record, expected answer, candidate, gold judgment and justification; arithmetic/exact/list checks independently corroborated in Python. Same agent as author, not an independent human reviewer.",
+  "result": "passed",
+  "counts": {
+    "abilities": {
+      "information-extraction": 20,
+      "cross-session-reasoning": 20,
+      "temporal-reasoning": 20,
+      "knowledge-update": 20,
+      "abstention": 20
+    },
+    "matchTypes": {
+      "semantic": 40,
+      "exact": 16,
+      "numeric": 16,
+      "ordered-list": 8,
+      "abstain": 20
+    },
+    "edgeCases": {
+      "paraphrased-correct": 8,
+      "near-miss": 8,
+      "contradictory": 8,
+      "false-abstention": 8,
+      "direct-correct": 8,
+      "exact-correct": 8,
+      "exact-near-miss": 8,
+      "numeric-tolerance-boundary": 8,
+      "numeric-outside-tolerance": 8,
+      "ordered-list-permutation": 2,
+      "ordered-list-partial": 2,
+      "ordered-list-extra": 2,
+      "ordered-list-correct": 2,
+      "correct-abstention": 10,
+      "unsupported-answer": 10
+    },
+    "goldJudgments": {
+      "pass": 34,
+      "fail": 48,
+      "abstain": 18
+    }
+  },
+  "separation": {
+    "generatorVersion": "1.0.0",
+    "generatedStartingPoint": {
+      "command": "python3 -m almm_fixture generate --sessions 10 --seed 14014 --output /tmp/bch-014-reference.json",
+      "contentHash": "8bae3908a230758e0790b86b90b383f7f7b49928f46c6e926d7edfde9a0fc9e6",
+      "method": "Used date/contact/budget, historical expiry, replacement venue, and cross-session aggregation patterns; independently replaced topics, entities, facts, questions, candidates and expected records."
+    },
+    "publicFixturesCompared": [
+      "fixtures/v1.0.0/almm-100-42.json",
+      "fixtures/v1.0.0/almm-1000-42.json",
+      "fixtures/v1.0.0/almm-10-42.json",
+      "fixtures/v1.0.0/almm-500-42.json"
+    ],
+    "possibleCanonicalQuestionsCompared": 11989,
+    "identicalQuestions": 0,
+    "heldOutMethod": "No private fixture or seed was read. Exhaustive comparison against all possible ProbePlacer.place question strings in generator 1.0.0 proves no identical probes for any public or held-out seed of that generator. Recheck on generator updates."
+  },
+  "duplicateContentConflicts": 0,
+  "records": [
+    {
+      "probeId": "cal-001",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both the date and sealed-envelope key arrangement at reception are preserved."
+    },
+    {
+      "probeId": "cal-002",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The date is correct, but the required key handoff arrangement is missing."
+    },
+    {
+      "probeId": "cal-003",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The correct arrangement is included, but the final date contradicts June 18."
+    },
+    {
+      "probeId": "cal-004",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The candidate declines despite both arrangements being explicitly recorded."
+    },
+    {
+      "probeId": "cal-005",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both required arrangements are stated without a conflicting date or handoff."
+    },
+    {
+      "probeId": "cal-006",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Later than 14:00 and an advance phone call express both conditions."
+    },
+    {
+      "probeId": "cal-007",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The advance call is correct, but the after-14:00 condition is omitted."
+    },
+    {
+      "probeId": "cal-008",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer includes both conditions then explicitly negates the required call."
+    },
+    {
+      "probeId": "cal-009",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both arrival conditions exist in the evidence, so declining is a false abstention."
+    },
+    {
+      "probeId": "cal-010",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both mandatory conditions are retained."
+    },
+    {
+      "probeId": "cal-011",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The repair-driven closure and replacement east studio are combined across sessions."
+    },
+    {
+      "probeId": "cal-012",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The closure explanation is correct, but the required replacement venue is missing."
+    },
+    {
+      "probeId": "cal-013",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The final venue contradicts the east studio despite correctly recalling the closure."
+    },
+    {
+      "probeId": "cal-014",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The reason and venue are recorded in later sessions, making the refusal a false abstention."
+    },
+    {
+      "probeId": "cal-015",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer combines the closure reason and current venue correctly."
+    },
+    {
+      "probeId": "cal-016",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Email distribution and the partner prerequisite for printing are both preserved."
+    },
+    {
+      "probeId": "cal-017",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The printing prerequisite is included but interim email distribution is missing."
+    },
+    {
+      "probeId": "cal-018",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Immediate printing without a partner contradicts the prerequisite."
+    },
+    {
+      "probeId": "cal-019",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both decisions are explicitly available and can be combined."
+    },
+    {
+      "probeId": "cal-020",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both planning decisions are correctly combined."
+    },
+    {
+      "probeId": "cal-021",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Twilight paraphrases dusk and a peaceful home preserves the quiet-house reason."
+    },
+    {
+      "probeId": "cal-022",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The historical time is correct, but the required reason is missing."
+    },
+    {
+      "probeId": "cal-023",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The final historical-time claim contradicts dusk."
+    },
+    {
+      "probeId": "cal-024",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Expiry removes current validity, not evidence of the historical preference and reason."
+    },
+    {
+      "probeId": "cal-025",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both historical claims are preserved without treating expiry as erasure."
+    },
+    {
+      "probeId": "cal-026",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The prior location and signature requirement are both retained."
+    },
+    {
+      "probeId": "cal-027",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The old location is correct but the historical signature requirement is absent."
+    },
+    {
+      "probeId": "cal-028",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer negates its own correct historical signature requirement."
+    },
+    {
+      "probeId": "cal-029",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The previous policy remains available for historical questions."
+    },
+    {
+      "probeId": "cal-030",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer selects both old-policy claims rather than the new policy."
+    },
+    {
+      "probeId": "cal-031",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The paraphrase selects both updated values and neither superseded value."
+    },
+    {
+      "probeId": "cal-032",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The new location is correct but the revised 09:00 time is missing."
+    },
+    {
+      "probeId": "cal-033",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer gives the updated arrangement but reinstates the superseded venue."
+    },
+    {
+      "probeId": "cal-034",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The replacement explicitly supplies both current values."
+    },
+    {
+      "probeId": "cal-035",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both current values replace the old arrangement."
+    },
+    {
+      "probeId": "cal-036",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Borrowing reusable items and depot collection both preserve the replacement plan."
+    },
+    {
+      "probeId": "cal-037",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The updated acquisition method is correct but depot collection is omitted."
+    },
+    {
+      "probeId": "cal-038",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Buying new decorations contradicts the instruction to borrow reusable ones."
+    },
+    {
+      "probeId": "cal-039",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The replacement plan is explicit, so this is a false abstention."
+    },
+    {
+      "probeId": "cal-040",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Both replacement actions are selected without the superseded purchase or delivery."
+    },
+    {
+      "probeId": "cal-041",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value Mira Sol, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-042",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The candidate names Mira Sun rather than the recorded Mira Sol."
+    },
+    {
+      "probeId": "cal-043",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value ASH-8042, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-044",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The final digit differs from the recorded code."
+    },
+    {
+      "probeId": "cal-045",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value Ivo Lane, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-046",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Lane is the recorded surname; Lake is not."
+    },
+    {
+      "probeId": "cal-047",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value SP-619, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-048",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The suffix is transposed relative to the recorded 619."
+    },
+    {
+      "probeId": "cal-049",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value 2032-03-08, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-050",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The candidate gives the replacement date rather than the historical original."
+    },
+    {
+      "probeId": "cal-051",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value MP-220, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-052",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The candidate transposes the historical code digits."
+    },
+    {
+      "probeId": "cal-053",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value Nia Reed, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-054",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The candidate selects the superseded contact rather than Nia Reed."
+    },
+    {
+      "probeId": "cal-055",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer is exactly the required value south terrace, selected for the requested time scope."
+    },
+    {
+      "probeId": "cal-056",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The candidate gives the superseded north garden, not the current south terrace."
+    },
+    {
+      "probeId": "cal-057",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The error is exactly -0.5 liters, on the inclusive lower tolerance edge."
+    },
+    {
+      "probeId": "cal-058",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The error is -0.51 liters, outside the 0.5-liter tolerance."
+    },
+    {
+      "probeId": "cal-059",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The error is exactly +0.5 kilograms, on the inclusive upper tolerance edge."
+    },
+    {
+      "probeId": "cal-060",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The error is +0.51 kilograms, outside the 0.5-kilogram tolerance."
+    },
+    {
+      "probeId": "cal-061",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The combined length is 12.0; 11.5 is exactly the inclusive lower edge."
+    },
+    {
+      "probeId": "cal-062",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The sum is 12.0; 11.49 differs by 0.51, beyond tolerance."
+    },
+    {
+      "probeId": "cal-063",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "30.0 minus 8.0 is 22.0; 22.5 is on the inclusive upper edge."
+    },
+    {
+      "probeId": "cal-064",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The travel-only time is 22.0; 22.51 is outside tolerance."
+    },
+    {
+      "probeId": "cal-065",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The historical allowance is 18.0; 17.5 is at the inclusive lower edge."
+    },
+    {
+      "probeId": "cal-066",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The historical allowance is 18.0; the error is 0.51 liters."
+    },
+    {
+      "probeId": "cal-067",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The historical deposit is 40.0; 40.5 is the inclusive upper edge."
+    },
+    {
+      "probeId": "cal-068",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer differs from the historical deposit by 0.51 dollars."
+    },
+    {
+      "probeId": "cal-069",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The corrected weight is 10.0; 9.5 is at the inclusive lower edge."
+    },
+    {
+      "probeId": "cal-070",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The corrected weight is 10.0; 9.49 is outside tolerance."
+    },
+    {
+      "probeId": "cal-071",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The new fare is 6.0; 6.5 is at the inclusive upper edge."
+    },
+    {
+      "probeId": "cal-072",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The new fare is 6.0; 6.51 is outside tolerance."
+    },
+    {
+      "probeId": "cal-073",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The right items appear, but the first two are reversed."
+    },
+    {
+      "probeId": "cal-074",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The post office is missing from the required three-item list."
+    },
+    {
+      "probeId": "cal-075",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Departure and transfer are reversed despite correct membership."
+    },
+    {
+      "probeId": "cal-076",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Bayend is an extra unsupported stop beyond the three requested values."
+    },
+    {
+      "probeId": "cal-077",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "All three historical stops are present in the old order."
+    },
+    {
+      "probeId": "cal-078",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The historical school stop is omitted."
+    },
+    {
+      "probeId": "cal-079",
+      "confirmedGoldJudgment": "pass",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The answer uses the complete replacement order, not the superseded order."
+    },
+    {
+      "probeId": "cal-080",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "Forks is an extra item absent from the replacement order."
+    },
+    {
+      "probeId": "cal-081",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-082",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value 4931 is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-083",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-084",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value Dana Flint is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-085",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-086",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value BR-881 is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-087",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-088",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value TX-5421 is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-089",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-090",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value 18 River Lane is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-091",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-092",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value 2030-05-12 is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-093",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-094",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value WL-922 is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-095",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-096",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value INS-737 is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-097",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-098",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value aspen-secret is still an unsupported factual answer."
+    },
+    {
+      "probeId": "cal-099",
+      "confirmedGoldJudgment": "abstain",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "The requested field was never supplied; the candidate correctly declines to invent a value."
+    },
+    {
+      "probeId": "cal-100",
+      "confirmedGoldJudgment": "fail",
+      "justificationConsistent": true,
+      "evidenceConsistent": true,
+      "reviewNote": "No evidence supplies the requested field. The hedged value P-68420 is still an unsupported factual answer."
+    }
+  ]
+}

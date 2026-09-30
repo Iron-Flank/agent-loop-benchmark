@@ -1,0 +1,4101 @@
+{
+  "schemaVersion": "calibration-1.0",
+  "calibrationSetId": "almm-calibration-1.0.0",
+  "calibrationSetVersion": "1.0.0",
+  "frozen": true,
+  "labelingMethod": "Manual agent authorship; no scorer-generated labels and no human reviewer participation claimed.",
+  "judgmentSemantics": {
+    "pass": "A substantive answer satisfies the entire expected record.",
+    "fail": "A substantive answer misses requirements, contradicts evidence, violates matching rules, or asserts an unsupported value.",
+    "abstain": "The candidate explicitly declines without a substantive answer; correct only when answerability is false. A false abstention remains gold abstain, not fail."
+  },
+  "probes": [
+    {
+      "probeId": "cal-001",
+      "ability": "information-extraction",
+      "question": "What two arrangements did I make for the Juniper car service?",
+      "candidateAnswer": "The appointment is June 18, 2031; reception will have an envelope, sealed, containing the keys.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The service is on 2031-06-18. The keys will be in a sealed envelope at reception."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The service is on 2031-06-18.",
+          "The keys will be in a sealed envelope at reception."
+        ],
+        "disallowedContradictions": [
+          "The service is on 2031-06-19.",
+          "The keys will be handed directly to the mechanic."
+        ],
+        "requiredFactIds": [
+          "cal-001-f1",
+          "cal-001-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Both the date and sealed-envelope key arrangement at reception are preserved.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-001-f1",
+          "sessionIndex": 1,
+          "text": "Juniper car service is on 2031-06-18.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-001-f2",
+          "sessionIndex": 1,
+          "text": "I will leave the keys in a sealed envelope at reception.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-002",
+      "ability": "information-extraction",
+      "question": "What two arrangements did I make for the Juniper car service?",
+      "candidateAnswer": "Service is booked for June 18, 2031.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The service is on 2031-06-18. The keys will be in a sealed envelope at reception."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The service is on 2031-06-18.",
+          "The keys will be in a sealed envelope at reception."
+        ],
+        "disallowedContradictions": [
+          "The service is on 2031-06-19.",
+          "The keys will be handed directly to the mechanic."
+        ],
+        "requiredFactIds": [
+          "cal-002-f1",
+          "cal-002-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The date is correct, but the required key handoff arrangement is missing.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-002-f1",
+          "sessionIndex": 1,
+          "text": "Juniper car service is on 2031-06-18.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-002-f2",
+          "sessionIndex": 1,
+          "text": "I will leave the keys in a sealed envelope at reception.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-003",
+      "ability": "information-extraction",
+      "question": "What two arrangements did I make for the Juniper car service?",
+      "candidateAnswer": "The service is on June 18, 2031 and keys are in a sealed envelope at reception, but the actual appointment is June 19.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The service is on 2031-06-18. The keys will be in a sealed envelope at reception."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The service is on 2031-06-18.",
+          "The keys will be in a sealed envelope at reception."
+        ],
+        "disallowedContradictions": [
+          "The service is on 2031-06-19.",
+          "The keys will be handed directly to the mechanic."
+        ],
+        "requiredFactIds": [
+          "cal-003-f1",
+          "cal-003-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The correct arrangement is included, but the final date contradicts June 18.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-003-f1",
+          "sessionIndex": 1,
+          "text": "Juniper car service is on 2031-06-18.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-003-f2",
+          "sessionIndex": 1,
+          "text": "I will leave the keys in a sealed envelope at reception.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-004",
+      "ability": "information-extraction",
+      "question": "What two arrangements did I make for the Juniper car service?",
+      "candidateAnswer": "I do not know.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The service is on 2031-06-18. The keys will be in a sealed envelope at reception."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The service is on 2031-06-18.",
+          "The keys will be in a sealed envelope at reception."
+        ],
+        "disallowedContradictions": [
+          "The service is on 2031-06-19.",
+          "The keys will be handed directly to the mechanic."
+        ],
+        "requiredFactIds": [
+          "cal-004-f1",
+          "cal-004-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The candidate declines despite both arrangements being explicitly recorded.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-004-f1",
+          "sessionIndex": 1,
+          "text": "Juniper car service is on 2031-06-18.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-004-f2",
+          "sessionIndex": 1,
+          "text": "I will leave the keys in a sealed envelope at reception.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-005",
+      "ability": "information-extraction",
+      "question": "What two arrangements did I make for the Juniper car service?",
+      "candidateAnswer": "The service is on 2031-06-18, with the keys in a sealed envelope at reception.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The service is on 2031-06-18. The keys will be in a sealed envelope at reception."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The service is on 2031-06-18.",
+          "The keys will be in a sealed envelope at reception."
+        ],
+        "disallowedContradictions": [
+          "The service is on 2031-06-19.",
+          "The keys will be handed directly to the mechanic."
+        ],
+        "requiredFactIds": [
+          "cal-005-f1",
+          "cal-005-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Both required arrangements are stated without a conflicting date or handoff.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-005-f1",
+          "sessionIndex": 1,
+          "text": "Juniper car service is on 2031-06-18.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-005-f2",
+          "sessionIndex": 1,
+          "text": "I will leave the keys in a sealed envelope at reception.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-006",
+      "ability": "information-extraction",
+      "question": "What conditions did I set for the Alder repair visit?",
+      "candidateAnswer": "Come later than two in the afternoon and phone me before getting here.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Arrival must be after 14:00. The technician must call before arrival."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Arrival must be after 14:00.",
+          "The technician must call before arrival."
+        ],
+        "disallowedContradictions": [
+          "Arrival before 14:00 is allowed.",
+          "No advance call is needed."
+        ],
+        "requiredFactIds": [
+          "cal-006-f1",
+          "cal-006-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Later than 14:00 and an advance phone call express both conditions.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-006-f1",
+          "sessionIndex": 1,
+          "text": "The Alder repair visit must be after 14:00.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-006-f2",
+          "sessionIndex": 1,
+          "text": "The technician must call before arriving.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-007",
+      "ability": "information-extraction",
+      "question": "What conditions did I set for the Alder repair visit?",
+      "candidateAnswer": "The technician should call before arrival.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Arrival must be after 14:00. The technician must call before arrival."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Arrival must be after 14:00.",
+          "The technician must call before arrival."
+        ],
+        "disallowedContradictions": [
+          "Arrival before 14:00 is allowed.",
+          "No advance call is needed."
+        ],
+        "requiredFactIds": [
+          "cal-007-f1",
+          "cal-007-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The advance call is correct, but the after-14:00 condition is omitted.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-007-f1",
+          "sessionIndex": 1,
+          "text": "The Alder repair visit must be after 14:00.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-007-f2",
+          "sessionIndex": 1,
+          "text": "The technician must call before arriving.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-008",
+      "ability": "information-extraction",
+      "question": "What conditions did I set for the Alder repair visit?",
+      "candidateAnswer": "Arrive after 14:00 and call first; no advance phone call is needed.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Arrival must be after 14:00. The technician must call before arrival."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Arrival must be after 14:00.",
+          "The technician must call before arrival."
+        ],
+        "disallowedContradictions": [
+          "Arrival before 14:00 is allowed.",
+          "No advance call is needed."
+        ],
+        "requiredFactIds": [
+          "cal-008-f1",
+          "cal-008-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The answer includes both conditions then explicitly negates the required call.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-008-f1",
+          "sessionIndex": 1,
+          "text": "The Alder repair visit must be after 14:00.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-008-f2",
+          "sessionIndex": 1,
+          "text": "The technician must call before arriving.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-009",
+      "ability": "information-extraction",
+      "question": "What conditions did I set for the Alder repair visit?",
+      "candidateAnswer": "There is not enough information to say.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Arrival must be after 14:00. The technician must call before arrival."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Arrival must be after 14:00.",
+          "The technician must call before arrival."
+        ],
+        "disallowedContradictions": [
+          "Arrival before 14:00 is allowed.",
+          "No advance call is needed."
+        ],
+        "requiredFactIds": [
+          "cal-009-f1",
+          "cal-009-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "Both arrival conditions exist in the evidence, so declining is a false abstention.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-009-f1",
+          "sessionIndex": 1,
+          "text": "The Alder repair visit must be after 14:00.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-009-f2",
+          "sessionIndex": 1,
+          "text": "The technician must call before arriving.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-010",
+      "ability": "information-extraction",
+      "question": "What conditions did I set for the Alder repair visit?",
+      "candidateAnswer": "The technician must arrive after 14:00 and call before arriving.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Arrival must be after 14:00. The technician must call before arrival."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Arrival must be after 14:00.",
+          "The technician must call before arrival."
+        ],
+        "disallowedContradictions": [
+          "Arrival before 14:00 is allowed.",
+          "No advance call is needed."
+        ],
+        "requiredFactIds": [
+          "cal-010-f1",
+          "cal-010-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Both mandatory conditions are retained.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-010-f1",
+          "sessionIndex": 1,
+          "text": "The Alder repair visit must be after 14:00.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-010-f2",
+          "sessionIndex": 1,
+          "text": "The technician must call before arriving.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-011",
+      "ability": "cross-session-reasoning",
+      "question": "Why can the Bracken choir not use the initially planned room, and where should it meet?",
+      "candidateAnswer": "Roof work has shut the glass room, so the choir will gather in the studio on the east side.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The glass room is closed for roof repairs. The choir should meet in the east studio."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The glass room is closed for roof repairs.",
+          "The choir should meet in the east studio."
+        ],
+        "disallowedContradictions": [
+          "The glass room remains available.",
+          "The choir should meet in the west studio."
+        ],
+        "requiredFactIds": [
+          "cal-011-f1",
+          "cal-011-f2",
+          "cal-011-f3"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The repair-driven closure and replacement east studio are combined across sessions.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-011-f1",
+          "sessionIndex": 1,
+          "text": "The Bracken choir initially planned to meet in the glass room.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-011-f2",
+          "sessionIndex": 101,
+          "text": "The glass room is closed for roof repairs.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-011-f3",
+          "sessionIndex": 501,
+          "text": "The choir has booked the east studio instead.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-012",
+      "ability": "cross-session-reasoning",
+      "question": "Why can the Bracken choir not use the initially planned room, and where should it meet?",
+      "candidateAnswer": "The glass room is closed for roof repairs.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The glass room is closed for roof repairs. The choir should meet in the east studio."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The glass room is closed for roof repairs.",
+          "The choir should meet in the east studio."
+        ],
+        "disallowedContradictions": [
+          "The glass room remains available.",
+          "The choir should meet in the west studio."
+        ],
+        "requiredFactIds": [
+          "cal-012-f1",
+          "cal-012-f2",
+          "cal-012-f3"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The closure explanation is correct, but the required replacement venue is missing.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-012-f1",
+          "sessionIndex": 1,
+          "text": "The Bracken choir initially planned to meet in the glass room.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-012-f2",
+          "sessionIndex": 101,
+          "text": "The glass room is closed for roof repairs.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-012-f3",
+          "sessionIndex": 501,
+          "text": "The choir has booked the east studio instead.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-013",
+      "ability": "cross-session-reasoning",
+      "question": "Why can the Bracken choir not use the initially planned room, and where should it meet?",
+      "candidateAnswer": "Roof repairs closed the glass room and the choir booked the east studio; it should actually meet in the west studio.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The glass room is closed for roof repairs. The choir should meet in the east studio."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The glass room is closed for roof repairs.",
+          "The choir should meet in the east studio."
+        ],
+        "disallowedContradictions": [
+          "The glass room remains available.",
+          "The choir should meet in the west studio."
+        ],
+        "requiredFactIds": [
+          "cal-013-f1",
+          "cal-013-f2",
+          "cal-013-f3"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The final venue contradicts the east studio despite correctly recalling the closure.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-013-f1",
+          "sessionIndex": 1,
+          "text": "The Bracken choir initially planned to meet in the glass room.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-013-f2",
+          "sessionIndex": 101,
+          "text": "The glass room is closed for roof repairs.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-013-f3",
+          "sessionIndex": 501,
+          "text": "The choir has booked the east studio instead.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-014",
+      "ability": "cross-session-reasoning",
+      "question": "Why can the Bracken choir not use the initially planned room, and where should it meet?",
+      "candidateAnswer": "I cannot determine the reason or venue.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The glass room is closed for roof repairs. The choir should meet in the east studio."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The glass room is closed for roof repairs.",
+          "The choir should meet in the east studio."
+        ],
+        "disallowedContradictions": [
+          "The glass room remains available.",
+          "The choir should meet in the west studio."
+        ],
+        "requiredFactIds": [
+          "cal-014-f1",
+          "cal-014-f2",
+          "cal-014-f3"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The reason and venue are recorded in later sessions, making the refusal a false abstention.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-014-f1",
+          "sessionIndex": 1,
+          "text": "The Bracken choir initially planned to meet in the glass room.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-014-f2",
+          "sessionIndex": 101,
+          "text": "The glass room is closed for roof repairs.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-014-f3",
+          "sessionIndex": 501,
+          "text": "The choir has booked the east studio instead.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-015",
+      "ability": "cross-session-reasoning",
+      "question": "Why can the Bracken choir not use the initially planned room, and where should it meet?",
+      "candidateAnswer": "The glass room is closed for roof repairs; meet in the east studio.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The glass room is closed for roof repairs. The choir should meet in the east studio."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The glass room is closed for roof repairs.",
+          "The choir should meet in the east studio."
+        ],
+        "disallowedContradictions": [
+          "The glass room remains available.",
+          "The choir should meet in the west studio."
+        ],
+        "requiredFactIds": [
+          "cal-015-f1",
+          "cal-015-f2",
+          "cal-015-f3"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer combines the closure reason and current venue correctly.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-015-f1",
+          "sessionIndex": 1,
+          "text": "The Bracken choir initially planned to meet in the glass room.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-015-f2",
+          "sessionIndex": 101,
+          "text": "The glass room is closed for roof repairs.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-015-f3",
+          "sessionIndex": 501,
+          "text": "The choir has booked the east studio instead.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-016",
+      "ability": "cross-session-reasoning",
+      "question": "How should we handle the Larch newsletter after combining the two planning decisions?",
+      "candidateAnswer": "Use email for now; hard copies must wait until we have a printing partner.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Find a printing partner before printing. Distribute the newsletter by email until then."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Find a printing partner before printing.",
+          "Distribute the newsletter by email until then."
+        ],
+        "disallowedContradictions": [
+          "Print before finding a partner.",
+          "Stop distributing the newsletter while waiting."
+        ],
+        "requiredFactIds": [
+          "cal-016-f1",
+          "cal-016-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Email distribution and the partner prerequisite for printing are both preserved.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-016-f1",
+          "sessionIndex": 1,
+          "text": "We must find a printing partner before printing the Larch newsletter.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-016-f2",
+          "sessionIndex": 101,
+          "text": "Until a printing partner is found, distribute the Larch newsletter by email.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-017",
+      "ability": "cross-session-reasoning",
+      "question": "How should we handle the Larch newsletter after combining the two planning decisions?",
+      "candidateAnswer": "Find a printing partner before printing.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Find a printing partner before printing. Distribute the newsletter by email until then."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Find a printing partner before printing.",
+          "Distribute the newsletter by email until then."
+        ],
+        "disallowedContradictions": [
+          "Print before finding a partner.",
+          "Stop distributing the newsletter while waiting."
+        ],
+        "requiredFactIds": [
+          "cal-017-f1",
+          "cal-017-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The printing prerequisite is included but interim email distribution is missing.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-017-f1",
+          "sessionIndex": 1,
+          "text": "We must find a printing partner before printing the Larch newsletter.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-017-f2",
+          "sessionIndex": 101,
+          "text": "Until a printing partner is found, distribute the Larch newsletter by email.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-018",
+      "ability": "cross-session-reasoning",
+      "question": "How should we handle the Larch newsletter after combining the two planning decisions?",
+      "candidateAnswer": "Find a printing partner first and email it meanwhile, but print it immediately before any partner is found.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Find a printing partner before printing. Distribute the newsletter by email until then."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Find a printing partner before printing.",
+          "Distribute the newsletter by email until then."
+        ],
+        "disallowedContradictions": [
+          "Print before finding a partner.",
+          "Stop distributing the newsletter while waiting."
+        ],
+        "requiredFactIds": [
+          "cal-018-f1",
+          "cal-018-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "Immediate printing without a partner contradicts the prerequisite.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-018-f1",
+          "sessionIndex": 1,
+          "text": "We must find a printing partner before printing the Larch newsletter.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-018-f2",
+          "sessionIndex": 101,
+          "text": "Until a printing partner is found, distribute the Larch newsletter by email.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-019",
+      "ability": "cross-session-reasoning",
+      "question": "How should we handle the Larch newsletter after combining the two planning decisions?",
+      "candidateAnswer": "I have no basis for a recommendation.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Find a printing partner before printing. Distribute the newsletter by email until then."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Find a printing partner before printing.",
+          "Distribute the newsletter by email until then."
+        ],
+        "disallowedContradictions": [
+          "Print before finding a partner.",
+          "Stop distributing the newsletter while waiting."
+        ],
+        "requiredFactIds": [
+          "cal-019-f1",
+          "cal-019-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "Both decisions are explicitly available and can be combined.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-019-f1",
+          "sessionIndex": 1,
+          "text": "We must find a printing partner before printing the Larch newsletter.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-019-f2",
+          "sessionIndex": 101,
+          "text": "Until a printing partner is found, distribute the Larch newsletter by email.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-020",
+      "ability": "cross-session-reasoning",
+      "question": "How should we handle the Larch newsletter after combining the two planning decisions?",
+      "candidateAnswer": "Find a printing partner before printing and distribute by email until then.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Find a printing partner before printing. Distribute the newsletter by email until then."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Find a printing partner before printing.",
+          "Distribute the newsletter by email until then."
+        ],
+        "disallowedContradictions": [
+          "Print before finding a partner.",
+          "Stop distributing the newsletter while waiting."
+        ],
+        "requiredFactIds": [
+          "cal-020-f1",
+          "cal-020-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Both planning decisions are correctly combined.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-020-f1",
+          "sessionIndex": 1,
+          "text": "We must find a printing partner before printing the Larch newsletter.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-020-f2",
+          "sessionIndex": 101,
+          "text": "Until a printing partner is found, distribute the Larch newsletter by email.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-021",
+      "ability": "temporal-reasoning",
+      "question": "Before the Rowan meditation preference expired, what was the preference and why?",
+      "candidateAnswer": "Back then I chose twilight since the home was peaceful.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The historical preference was dusk. The reason was that the house was quiet."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The historical preference was dusk.",
+          "The reason was that the house was quiet."
+        ],
+        "disallowedContradictions": [
+          "The historical preference was dawn.",
+          "The preference was chosen because the house was noisy."
+        ],
+        "requiredFactIds": [
+          "cal-021-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Twilight paraphrases dusk and a peaceful home preserves the quiet-house reason.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-021-f1",
+          "sessionIndex": 1,
+          "text": "For Rowan meditation I preferred dusk because the house was quiet.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-021-f2",
+          "sessionIndex": 101,
+          "text": "The dusk preference expired; I have not chosen a replacement.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-022",
+      "ability": "temporal-reasoning",
+      "question": "Before the Rowan meditation preference expired, what was the preference and why?",
+      "candidateAnswer": "The historical preference was dusk.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The historical preference was dusk. The reason was that the house was quiet."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The historical preference was dusk.",
+          "The reason was that the house was quiet."
+        ],
+        "disallowedContradictions": [
+          "The historical preference was dawn.",
+          "The preference was chosen because the house was noisy."
+        ],
+        "requiredFactIds": [
+          "cal-022-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The historical time is correct, but the required reason is missing.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-022-f1",
+          "sessionIndex": 1,
+          "text": "For Rowan meditation I preferred dusk because the house was quiet.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-022-f2",
+          "sessionIndex": 101,
+          "text": "The dusk preference expired; I have not chosen a replacement.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-023",
+      "ability": "temporal-reasoning",
+      "question": "Before the Rowan meditation preference expired, what was the preference and why?",
+      "candidateAnswer": "It used to be dusk because the house was quiet; the old preference was actually dawn.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The historical preference was dusk. The reason was that the house was quiet."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The historical preference was dusk.",
+          "The reason was that the house was quiet."
+        ],
+        "disallowedContradictions": [
+          "The historical preference was dawn.",
+          "The preference was chosen because the house was noisy."
+        ],
+        "requiredFactIds": [
+          "cal-023-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The final historical-time claim contradicts dusk.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-023-f1",
+          "sessionIndex": 1,
+          "text": "For Rowan meditation I preferred dusk because the house was quiet.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-023-f2",
+          "sessionIndex": 101,
+          "text": "The dusk preference expired; I have not chosen a replacement.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-024",
+      "ability": "temporal-reasoning",
+      "question": "Before the Rowan meditation preference expired, what was the preference and why?",
+      "candidateAnswer": "Since it expired, I cannot tell you the old preference.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The historical preference was dusk. The reason was that the house was quiet."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The historical preference was dusk.",
+          "The reason was that the house was quiet."
+        ],
+        "disallowedContradictions": [
+          "The historical preference was dawn.",
+          "The preference was chosen because the house was noisy."
+        ],
+        "requiredFactIds": [
+          "cal-024-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "Expiry removes current validity, not evidence of the historical preference and reason.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-024-f1",
+          "sessionIndex": 1,
+          "text": "For Rowan meditation I preferred dusk because the house was quiet.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-024-f2",
+          "sessionIndex": 101,
+          "text": "The dusk preference expired; I have not chosen a replacement.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-025",
+      "ability": "temporal-reasoning",
+      "question": "Before the Rowan meditation preference expired, what was the preference and why?",
+      "candidateAnswer": "Before expiry, I preferred dusk because the house was quiet.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The historical preference was dusk. The reason was that the house was quiet."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The historical preference was dusk.",
+          "The reason was that the house was quiet."
+        ],
+        "disallowedContradictions": [
+          "The historical preference was dawn.",
+          "The preference was chosen because the house was noisy."
+        ],
+        "requiredFactIds": [
+          "cal-025-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "Both historical claims are preserved without treating expiry as erasure.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-025-f1",
+          "sessionIndex": 1,
+          "text": "For Rowan meditation I preferred dusk because the house was quiet.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-025-f2",
+          "sessionIndex": 101,
+          "text": "The dusk preference expired; I have not chosen a replacement.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-026",
+      "ability": "temporal-reasoning",
+      "question": "What was the Cedar parcel policy before the September change?",
+      "candidateAnswer": "Under the earlier policy, deliveries were left in the lobby and someone had to sign for them.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Before September, parcels went to the lobby. Before September, a signed receipt was required."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Before September, parcels went to the lobby.",
+          "Before September, a signed receipt was required."
+        ],
+        "disallowedContradictions": [
+          "Before September, parcels went to the side desk.",
+          "Before September, signatures were not needed."
+        ],
+        "requiredFactIds": [
+          "cal-026-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The prior location and signature requirement are both retained.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-026-f1",
+          "sessionIndex": 1,
+          "text": "Before September, Cedar parcels went to the lobby and required a signed receipt.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-026-f2",
+          "sessionIndex": 501,
+          "text": "From September onward, Cedar parcels go to the side desk without a signature.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-027",
+      "ability": "temporal-reasoning",
+      "question": "What was the Cedar parcel policy before the September change?",
+      "candidateAnswer": "Before September, parcels went to the lobby.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Before September, parcels went to the lobby. Before September, a signed receipt was required."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Before September, parcels went to the lobby.",
+          "Before September, a signed receipt was required."
+        ],
+        "disallowedContradictions": [
+          "Before September, parcels went to the side desk.",
+          "Before September, signatures were not needed."
+        ],
+        "requiredFactIds": [
+          "cal-027-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The old location is correct but the historical signature requirement is absent.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-027-f1",
+          "sessionIndex": 1,
+          "text": "Before September, Cedar parcels went to the lobby and required a signed receipt.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-027-f2",
+          "sessionIndex": 501,
+          "text": "From September onward, Cedar parcels go to the side desk without a signature.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-028",
+      "ability": "temporal-reasoning",
+      "question": "What was the Cedar parcel policy before the September change?",
+      "candidateAnswer": "Before September, parcels went to the lobby with a signed receipt, and no signature was needed then.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Before September, parcels went to the lobby. Before September, a signed receipt was required."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Before September, parcels went to the lobby.",
+          "Before September, a signed receipt was required."
+        ],
+        "disallowedContradictions": [
+          "Before September, parcels went to the side desk.",
+          "Before September, signatures were not needed."
+        ],
+        "requiredFactIds": [
+          "cal-028-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The answer negates its own correct historical signature requirement.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-028-f1",
+          "sessionIndex": 1,
+          "text": "Before September, Cedar parcels went to the lobby and required a signed receipt.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-028-f2",
+          "sessionIndex": 501,
+          "text": "From September onward, Cedar parcels go to the side desk without a signature.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-029",
+      "ability": "temporal-reasoning",
+      "question": "What was the Cedar parcel policy before the September change?",
+      "candidateAnswer": "I only know the new policy, not the previous one.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Before September, parcels went to the lobby. Before September, a signed receipt was required."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Before September, parcels went to the lobby.",
+          "Before September, a signed receipt was required."
+        ],
+        "disallowedContradictions": [
+          "Before September, parcels went to the side desk.",
+          "Before September, signatures were not needed."
+        ],
+        "requiredFactIds": [
+          "cal-029-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The previous policy remains available for historical questions.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-029-f1",
+          "sessionIndex": 1,
+          "text": "Before September, Cedar parcels went to the lobby and required a signed receipt.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-029-f2",
+          "sessionIndex": 501,
+          "text": "From September onward, Cedar parcels go to the side desk without a signature.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-030",
+      "ability": "temporal-reasoning",
+      "question": "What was the Cedar parcel policy before the September change?",
+      "candidateAnswer": "Before September, parcels went to the lobby and required a signed receipt.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Before September, parcels went to the lobby. Before September, a signed receipt was required."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Before September, parcels went to the lobby.",
+          "Before September, a signed receipt was required."
+        ],
+        "disallowedContradictions": [
+          "Before September, parcels went to the side desk.",
+          "Before September, signatures were not needed."
+        ],
+        "requiredFactIds": [
+          "cal-030-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer selects both old-policy claims rather than the new policy.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-030-f1",
+          "sessionIndex": 1,
+          "text": "Before September, Cedar parcels went to the lobby and required a signed receipt.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-030-f2",
+          "sessionIndex": 501,
+          "text": "From September onward, Cedar parcels go to the side desk without a signature.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-031",
+      "ability": "knowledge-update",
+      "question": "What is the current Willow birdwatching meeting arrangement after the revision?",
+      "candidateAnswer": "The revised plan is nine in the morning at the pavilion built of stone.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The current location is the stone pavilion. The current meeting time is 09:00."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The current location is the stone pavilion.",
+          "The current meeting time is 09:00."
+        ],
+        "disallowedContradictions": [
+          "The current location is the orchard cafe.",
+          "The current time is 08:00."
+        ],
+        "requiredFactIds": [
+          "cal-031-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-031-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "The paraphrase selects both updated values and neither superseded value.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-031-f1",
+          "sessionIndex": 1,
+          "text": "Willow birdwatching met at the orchard cafe at 08:00.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-031-f2",
+          "sessionIndex": 101,
+          "text": "Replace the Willow birdwatching arrangement: meet at the stone pavilion at 09:00.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-032",
+      "ability": "knowledge-update",
+      "question": "What is the current Willow birdwatching meeting arrangement after the revision?",
+      "candidateAnswer": "The current meeting is at the stone pavilion.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The current location is the stone pavilion. The current meeting time is 09:00."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The current location is the stone pavilion.",
+          "The current meeting time is 09:00."
+        ],
+        "disallowedContradictions": [
+          "The current location is the orchard cafe.",
+          "The current time is 08:00."
+        ],
+        "requiredFactIds": [
+          "cal-032-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-032-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "The new location is correct but the revised 09:00 time is missing.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-032-f1",
+          "sessionIndex": 1,
+          "text": "Willow birdwatching met at the orchard cafe at 08:00.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-032-f2",
+          "sessionIndex": 101,
+          "text": "Replace the Willow birdwatching arrangement: meet at the stone pavilion at 09:00.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-033",
+      "ability": "knowledge-update",
+      "question": "What is the current Willow birdwatching meeting arrangement after the revision?",
+      "candidateAnswer": "Meet at the stone pavilion at 09:00; the current venue is still the orchard cafe.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The current location is the stone pavilion. The current meeting time is 09:00."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The current location is the stone pavilion.",
+          "The current meeting time is 09:00."
+        ],
+        "disallowedContradictions": [
+          "The current location is the orchard cafe.",
+          "The current time is 08:00."
+        ],
+        "requiredFactIds": [
+          "cal-033-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-033-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "The answer gives the updated arrangement but reinstates the superseded venue.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-033-f1",
+          "sessionIndex": 1,
+          "text": "Willow birdwatching met at the orchard cafe at 08:00.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-033-f2",
+          "sessionIndex": 101,
+          "text": "Replace the Willow birdwatching arrangement: meet at the stone pavilion at 09:00.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-034",
+      "ability": "knowledge-update",
+      "question": "What is the current Willow birdwatching meeting arrangement after the revision?",
+      "candidateAnswer": "The change makes the current arrangement impossible to determine.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The current location is the stone pavilion. The current meeting time is 09:00."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The current location is the stone pavilion.",
+          "The current meeting time is 09:00."
+        ],
+        "disallowedContradictions": [
+          "The current location is the orchard cafe.",
+          "The current time is 08:00."
+        ],
+        "requiredFactIds": [
+          "cal-034-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-034-f1"
+        ]
+      },
+      "goldJudgment": "abstain",
+      "justification": "The replacement explicitly supplies both current values.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-034-f1",
+          "sessionIndex": 1,
+          "text": "Willow birdwatching met at the orchard cafe at 08:00.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-034-f2",
+          "sessionIndex": 101,
+          "text": "Replace the Willow birdwatching arrangement: meet at the stone pavilion at 09:00.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-035",
+      "ability": "knowledge-update",
+      "question": "What is the current Willow birdwatching meeting arrangement after the revision?",
+      "candidateAnswer": "Meet at the stone pavilion at 09:00.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "The current location is the stone pavilion. The current meeting time is 09:00."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "The current location is the stone pavilion.",
+          "The current meeting time is 09:00."
+        ],
+        "disallowedContradictions": [
+          "The current location is the orchard cafe.",
+          "The current time is 08:00."
+        ],
+        "requiredFactIds": [
+          "cal-035-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-035-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "Both current values replace the old arrangement.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-035-f1",
+          "sessionIndex": 1,
+          "text": "Willow birdwatching met at the orchard cafe at 08:00.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-035-f2",
+          "sessionIndex": 101,
+          "text": "Replace the Willow birdwatching arrangement: meet at the stone pavilion at 09:00.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-036",
+      "ability": "knowledge-update",
+      "question": "What is the updated Elm decoration plan?",
+      "candidateAnswer": "Use reusable decorations on loan and pick them up from the depot.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Borrow reusable decorations. Collect the decorations at the depot."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Borrow reusable decorations.",
+          "Collect the decorations at the depot."
+        ],
+        "disallowedContradictions": [
+          "Buy new decorations.",
+          "Deliver the decorations to the front door."
+        ],
+        "requiredFactIds": [
+          "cal-036-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-036-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "Borrowing reusable items and depot collection both preserve the replacement plan.",
+      "edgeCases": [
+        "paraphrased-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-036-f1",
+          "sessionIndex": 1,
+          "text": "Elm decorations should be purchased new and delivered to the front door.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-036-f2",
+          "sessionIndex": 501,
+          "text": "Replace the Elm decoration plan: borrow reusable decorations and collect them at the depot.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-037",
+      "ability": "knowledge-update",
+      "question": "What is the updated Elm decoration plan?",
+      "candidateAnswer": "Borrow reusable decorations.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Borrow reusable decorations. Collect the decorations at the depot."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Borrow reusable decorations.",
+          "Collect the decorations at the depot."
+        ],
+        "disallowedContradictions": [
+          "Buy new decorations.",
+          "Deliver the decorations to the front door."
+        ],
+        "requiredFactIds": [
+          "cal-037-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-037-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "The updated acquisition method is correct but depot collection is omitted.",
+      "edgeCases": [
+        "near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-037-f1",
+          "sessionIndex": 1,
+          "text": "Elm decorations should be purchased new and delivered to the front door.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-037-f2",
+          "sessionIndex": 501,
+          "text": "Replace the Elm decoration plan: borrow reusable decorations and collect them at the depot.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-038",
+      "ability": "knowledge-update",
+      "question": "What is the updated Elm decoration plan?",
+      "candidateAnswer": "Borrow reusable decorations and collect them at the depot, but buy new decorations instead.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Borrow reusable decorations. Collect the decorations at the depot."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Borrow reusable decorations.",
+          "Collect the decorations at the depot."
+        ],
+        "disallowedContradictions": [
+          "Buy new decorations.",
+          "Deliver the decorations to the front door."
+        ],
+        "requiredFactIds": [
+          "cal-038-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-038-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "Buying new decorations contradicts the instruction to borrow reusable ones.",
+      "edgeCases": [
+        "contradictory"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-038-f1",
+          "sessionIndex": 1,
+          "text": "Elm decorations should be purchased new and delivered to the front door.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-038-f2",
+          "sessionIndex": 501,
+          "text": "Replace the Elm decoration plan: borrow reusable decorations and collect them at the depot.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-039",
+      "ability": "knowledge-update",
+      "question": "What is the updated Elm decoration plan?",
+      "candidateAnswer": "I do not know the updated plan.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Borrow reusable decorations. Collect the decorations at the depot."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Borrow reusable decorations.",
+          "Collect the decorations at the depot."
+        ],
+        "disallowedContradictions": [
+          "Buy new decorations.",
+          "Deliver the decorations to the front door."
+        ],
+        "requiredFactIds": [
+          "cal-039-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-039-f1"
+        ]
+      },
+      "goldJudgment": "abstain",
+      "justification": "The replacement plan is explicit, so this is a false abstention.",
+      "edgeCases": [
+        "false-abstention"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-039-f1",
+          "sessionIndex": 1,
+          "text": "Elm decorations should be purchased new and delivered to the front door.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-039-f2",
+          "sessionIndex": 501,
+          "text": "Replace the Elm decoration plan: borrow reusable decorations and collect them at the depot.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-040",
+      "ability": "knowledge-update",
+      "question": "What is the updated Elm decoration plan?",
+      "candidateAnswer": "Borrow reusable decorations and collect them at the depot.",
+      "expected": {
+        "matchType": "semantic",
+        "acceptedAnswers": [
+          "Borrow reusable decorations. Collect the decorations at the depot."
+        ],
+        "rubric": "Pass only if every required claim is conveyed and no disallowed contradiction is asserted. Mentioning old values explicitly as historical is allowed. An explicit refusal without a substantive answer is abstain, even when answerable.",
+        "requiredClaims": [
+          "Borrow reusable decorations.",
+          "Collect the decorations at the depot."
+        ],
+        "disallowedContradictions": [
+          "Buy new decorations.",
+          "Deliver the decorations to the front door."
+        ],
+        "requiredFactIds": [
+          "cal-040-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-040-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "Both replacement actions are selected without the superseded purchase or delivery.",
+      "edgeCases": [
+        "direct-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-040-f1",
+          "sessionIndex": 1,
+          "text": "Elm decorations should be purchased new and delivered to the front door.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-040-f2",
+          "sessionIndex": 501,
+          "text": "Replace the Elm decoration plan: borrow reusable decorations and collect them at the depot.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-041",
+      "ability": "information-extraction",
+      "question": "Who is the designated contact for Birch apartment repairs?",
+      "candidateAnswer": "Mira Sol",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "Mira Sol"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-041-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value Mira Sol, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-041-f1",
+          "sessionIndex": 1,
+          "text": "Birch apartment repairs are assigned to Mira Sol.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-042",
+      "ability": "information-extraction",
+      "question": "Who is the designated contact for Birch apartment repairs?",
+      "candidateAnswer": "Mira Sun",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "Mira Sol"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-042-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The candidate names Mira Sun rather than the recorded Mira Sol.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-042-f1",
+          "sessionIndex": 1,
+          "text": "Birch apartment repairs are assigned to Mira Sol.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-043",
+      "ability": "information-extraction",
+      "question": "What is the Ash library reservation code?",
+      "candidateAnswer": "ASH-8042",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "ASH-8042"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-043-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value ASH-8042, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-043-f1",
+          "sessionIndex": 1,
+          "text": "The Ash library reservation code is ASH-8042.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-044",
+      "ability": "information-extraction",
+      "question": "What is the Ash library reservation code?",
+      "candidateAnswer": "ASH-8043",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "ASH-8042"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-044-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The final digit differs from the recorded code.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-044-f1",
+          "sessionIndex": 1,
+          "text": "The Ash library reservation code is ASH-8042.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-045",
+      "ability": "cross-session-reasoning",
+      "question": "What full name results from joining the given name and surname of the Fern coordinator?",
+      "candidateAnswer": "Ivo Lane",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "Ivo Lane"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-045-f1",
+          "cal-045-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value Ivo Lane, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-045-f1",
+          "sessionIndex": 1,
+          "text": "The Fern coordinator has given name Ivo.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-045-f2",
+          "sessionIndex": 101,
+          "text": "The Fern coordinator has surname Lane.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-046",
+      "ability": "cross-session-reasoning",
+      "question": "What full name results from joining the given name and surname of the Fern coordinator?",
+      "candidateAnswer": "Ivo Lake",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "Ivo Lane"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-046-f1",
+          "cal-046-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "Lane is the recorded surname; Lake is not.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-046-f1",
+          "sessionIndex": 1,
+          "text": "The Fern coordinator has given name Ivo.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-046-f2",
+          "sessionIndex": 101,
+          "text": "The Fern coordinator has surname Lane.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-047",
+      "ability": "cross-session-reasoning",
+      "question": "What code results from joining the Spruce prefix and suffix with a hyphen?",
+      "candidateAnswer": "SP-619",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "SP-619"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-047-f1",
+          "cal-047-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value SP-619, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-047-f1",
+          "sessionIndex": 1,
+          "text": "The Spruce parcel prefix is SP.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-047-f2",
+          "sessionIndex": 501,
+          "text": "The Spruce parcel suffix is 619.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-048",
+      "ability": "cross-session-reasoning",
+      "question": "What code results from joining the Spruce prefix and suffix with a hyphen?",
+      "candidateAnswer": "SP-691",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "SP-619"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-048-f1",
+          "cal-048-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The suffix is transposed relative to the recorded 619.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-048-f1",
+          "sessionIndex": 1,
+          "text": "The Spruce parcel prefix is SP.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-048-f2",
+          "sessionIndex": 501,
+          "text": "The Spruce parcel suffix is 619.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-049",
+      "ability": "temporal-reasoning",
+      "question": "What was the original Hazel workshop date before it was rescheduled?",
+      "candidateAnswer": "2032-03-08",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "2032-03-08"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-049-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value 2032-03-08, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-049-f1",
+          "sessionIndex": 1,
+          "text": "Hazel workshop was originally scheduled for 2032-03-08.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-049-f2",
+          "sessionIndex": 101,
+          "text": "The new Hazel workshop date is 2032-03-15.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-050",
+      "ability": "temporal-reasoning",
+      "question": "What was the original Hazel workshop date before it was rescheduled?",
+      "candidateAnswer": "2032-03-15",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "2032-03-08"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-050-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The candidate gives the replacement date rather than the historical original.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-050-f1",
+          "sessionIndex": 1,
+          "text": "Hazel workshop was originally scheduled for 2032-03-08.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-050-f2",
+          "sessionIndex": 101,
+          "text": "The new Hazel workshop date is 2032-03-15.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-051",
+      "ability": "temporal-reasoning",
+      "question": "Before expiry, what was the Maple locker code?",
+      "candidateAnswer": "MP-220",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "MP-220"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-051-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value MP-220, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-051-f1",
+          "sessionIndex": 1,
+          "text": "The Maple locker code was MP-220.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-051-f2",
+          "sessionIndex": 501,
+          "text": "MP-220 expired without a replacement.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-052",
+      "ability": "temporal-reasoning",
+      "question": "Before expiry, what was the Maple locker code?",
+      "candidateAnswer": "MP-202",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "MP-220"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-052-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The candidate transposes the historical code digits.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-052-f1",
+          "sessionIndex": 1,
+          "text": "The Maple locker code was MP-220.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-052-f2",
+          "sessionIndex": 501,
+          "text": "MP-220 expired without a replacement.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-053",
+      "ability": "knowledge-update",
+      "question": "Who is the current Pine rehearsal contact after replacement?",
+      "candidateAnswer": "Nia Reed",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "Nia Reed"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-053-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-053-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value Nia Reed, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-053-f1",
+          "sessionIndex": 1,
+          "text": "Pine rehearsal contact was Omar Vale.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-053-f2",
+          "sessionIndex": 101,
+          "text": "Replace Omar Vale with Nia Reed as Pine rehearsal contact.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-054",
+      "ability": "knowledge-update",
+      "question": "Who is the current Pine rehearsal contact after replacement?",
+      "candidateAnswer": "Omar Vale",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "Nia Reed"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-054-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-054-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "The candidate selects the superseded contact rather than Nia Reed.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-054-f1",
+          "sessionIndex": 1,
+          "text": "Pine rehearsal contact was Omar Vale.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-054-f2",
+          "sessionIndex": 101,
+          "text": "Replace Omar Vale with Nia Reed as Pine rehearsal contact.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-055",
+      "ability": "knowledge-update",
+      "question": "What is the current Acacia outing venue after the move?",
+      "candidateAnswer": "south terrace",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "south terrace"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-055-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-055-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer is exactly the required value south terrace, selected for the requested time scope.",
+      "edgeCases": [
+        "exact-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-055-f1",
+          "sessionIndex": 1,
+          "text": "Acacia outings used the north garden.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-055-f2",
+          "sessionIndex": 501,
+          "text": "Move Acacia outings to the south terrace; the north garden is no longer current.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-056",
+      "ability": "knowledge-update",
+      "question": "What is the current Acacia outing venue after the move?",
+      "candidateAnswer": "north garden",
+      "expected": {
+        "matchType": "exact",
+        "acceptedAnswers": [
+          "south terrace"
+        ],
+        "normalization": "Trim surrounding whitespace; preserve case, punctuation and internal whitespace.",
+        "requiredFactIds": [
+          "cal-056-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-056-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "The candidate gives the superseded north garden, not the current south terrace.",
+      "edgeCases": [
+        "exact-near-miss"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-056-f1",
+          "sessionIndex": 1,
+          "text": "Acacia outings used the north garden.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-056-f2",
+          "sessionIndex": 501,
+          "text": "Move Acacia outings to the south terrace; the north garden is no longer current.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-057",
+      "ability": "information-extraction",
+      "question": "What is the Birch kettle capacity in liters?",
+      "candidateAnswer": "1.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "2.0"
+        ],
+        "targetNumber": "2.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-057-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The error is exactly -0.5 liters, on the inclusive lower tolerance edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-057-f1",
+          "sessionIndex": 1,
+          "text": "The Birch kettle capacity is 2.0 liters.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-058",
+      "ability": "information-extraction",
+      "question": "What is the Birch kettle capacity in liters?",
+      "candidateAnswer": "1.49",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "2.0"
+        ],
+        "targetNumber": "2.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-058-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The error is -0.51 liters, outside the 0.5-liter tolerance.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-058-f1",
+          "sessionIndex": 1,
+          "text": "The Birch kettle capacity is 2.0 liters.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-059",
+      "ability": "information-extraction",
+      "question": "What is the Ash parcel mass in kilograms?",
+      "candidateAnswer": "4.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "4.0"
+        ],
+        "targetNumber": "4.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-059-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The error is exactly +0.5 kilograms, on the inclusive upper tolerance edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-059-f1",
+          "sessionIndex": 1,
+          "text": "The Ash parcel mass is 4.0 kilograms.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-060",
+      "ability": "information-extraction",
+      "question": "What is the Ash parcel mass in kilograms?",
+      "candidateAnswer": "4.51",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "4.0"
+        ],
+        "targetNumber": "4.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-060-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The error is +0.51 kilograms, outside the 0.5-kilogram tolerance.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-060-f1",
+          "sessionIndex": 1,
+          "text": "The Ash parcel mass is 4.0 kilograms.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-061",
+      "ability": "cross-session-reasoning",
+      "question": "What is the combined Fern material length in meters?",
+      "candidateAnswer": "11.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "12.0"
+        ],
+        "targetNumber": "12.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-061-f1",
+          "cal-061-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The combined length is 12.0; 11.5 is exactly the inclusive lower edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-061-f1",
+          "sessionIndex": 1,
+          "text": "Fern material A is 7.0 meters long.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-061-f2",
+          "sessionIndex": 101,
+          "text": "Fern material B is 5.0 meters long.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-062",
+      "ability": "cross-session-reasoning",
+      "question": "What is the combined Fern material length in meters?",
+      "candidateAnswer": "11.49",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "12.0"
+        ],
+        "targetNumber": "12.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-062-f1",
+          "cal-062-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The sum is 12.0; 11.49 differs by 0.51, beyond tolerance.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-062-f1",
+          "sessionIndex": 1,
+          "text": "Fern material A is 7.0 meters long.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-062-f2",
+          "sessionIndex": 101,
+          "text": "Fern material B is 5.0 meters long.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-063",
+      "ability": "cross-session-reasoning",
+      "question": "How much Spruce travel time in minutes remains after subtracting the recorded pause?",
+      "candidateAnswer": "22.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "22.0"
+        ],
+        "targetNumber": "22.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-063-f1",
+          "cal-063-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "30.0 minus 8.0 is 22.0; 22.5 is on the inclusive upper edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-063-f1",
+          "sessionIndex": 1,
+          "text": "Spruce elapsed travel including the pause was 30.0 minutes.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-063-f2",
+          "sessionIndex": 501,
+          "text": "The Spruce pause lasted 8.0 minutes.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-064",
+      "ability": "cross-session-reasoning",
+      "question": "How much Spruce travel time in minutes remains after subtracting the recorded pause?",
+      "candidateAnswer": "22.51",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "22.0"
+        ],
+        "targetNumber": "22.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-064-f1",
+          "cal-064-f2"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The travel-only time is 22.0; 22.51 is outside tolerance.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-064-f1",
+          "sessionIndex": 1,
+          "text": "Spruce elapsed travel including the pause was 30.0 minutes.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-064-f2",
+          "sessionIndex": 501,
+          "text": "The Spruce pause lasted 8.0 minutes.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-065",
+      "ability": "temporal-reasoning",
+      "question": "What was the Hazel water allowance in liters before revision?",
+      "candidateAnswer": "17.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "18.0"
+        ],
+        "targetNumber": "18.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-065-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The historical allowance is 18.0; 17.5 is at the inclusive lower edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-065-f1",
+          "sessionIndex": 1,
+          "text": "Hazel water allowance was 18.0 liters.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-065-f2",
+          "sessionIndex": 101,
+          "text": "Hazel water allowance is now 21.0 liters.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-066",
+      "ability": "temporal-reasoning",
+      "question": "What was the Hazel water allowance in liters before revision?",
+      "candidateAnswer": "17.49",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "18.0"
+        ],
+        "targetNumber": "18.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-066-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The historical allowance is 18.0; the error is 0.51 liters.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-066-f1",
+          "sessionIndex": 1,
+          "text": "Hazel water allowance was 18.0 liters.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-066-f2",
+          "sessionIndex": 101,
+          "text": "Hazel water allowance is now 21.0 liters.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-067",
+      "ability": "temporal-reasoning",
+      "question": "Before expiry, what was the Maple booking deposit in dollars?",
+      "candidateAnswer": "40.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "40.0"
+        ],
+        "targetNumber": "40.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-067-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "The historical deposit is 40.0; 40.5 is the inclusive upper edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-067-f1",
+          "sessionIndex": 1,
+          "text": "The Maple deposit was 40.0 dollars.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-067-f2",
+          "sessionIndex": 501,
+          "text": "The Maple deposit agreement expired.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-068",
+      "ability": "temporal-reasoning",
+      "question": "Before expiry, what was the Maple booking deposit in dollars?",
+      "candidateAnswer": "40.51",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "40.0"
+        ],
+        "targetNumber": "40.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-068-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The answer differs from the historical deposit by 0.51 dollars.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-068-f1",
+          "sessionIndex": 1,
+          "text": "The Maple deposit was 40.0 dollars.",
+          "state": "expired"
+        },
+        {
+          "factId": "cal-068-f2",
+          "sessionIndex": 501,
+          "text": "The Maple deposit agreement expired.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-069",
+      "ability": "knowledge-update",
+      "question": "What is the current Pine supply weight in kilograms after correction?",
+      "candidateAnswer": "9.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "10.0"
+        ],
+        "targetNumber": "10.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-069-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-069-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "The corrected weight is 10.0; 9.5 is at the inclusive lower edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-069-f1",
+          "sessionIndex": 1,
+          "text": "Pine supply weight was recorded as 9.0 kilograms.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-069-f2",
+          "sessionIndex": 101,
+          "text": "Correct the Pine supply weight to 10.0 kilograms.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-070",
+      "ability": "knowledge-update",
+      "question": "What is the current Pine supply weight in kilograms after correction?",
+      "candidateAnswer": "9.49",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "10.0"
+        ],
+        "targetNumber": "10.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-070-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-070-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "The corrected weight is 10.0; 9.49 is outside tolerance.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-070-f1",
+          "sessionIndex": 1,
+          "text": "Pine supply weight was recorded as 9.0 kilograms.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-070-f2",
+          "sessionIndex": 101,
+          "text": "Correct the Pine supply weight to 10.0 kilograms.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-071",
+      "ability": "knowledge-update",
+      "question": "What is the current Acacia fare in dollars after the price change?",
+      "candidateAnswer": "6.5",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "6.0"
+        ],
+        "targetNumber": "6.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-071-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-071-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "The new fare is 6.0; 6.5 is at the inclusive upper edge.",
+      "edgeCases": [
+        "numeric-tolerance-boundary"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-071-f1",
+          "sessionIndex": 1,
+          "text": "Acacia fare was 5.0 dollars.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-071-f2",
+          "sessionIndex": 501,
+          "text": "Replace the Acacia fare with 6.0 dollars.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-072",
+      "ability": "knowledge-update",
+      "question": "What is the current Acacia fare in dollars after the price change?",
+      "candidateAnswer": "6.51",
+      "expected": {
+        "matchType": "numeric",
+        "acceptedAnswers": [
+          "6.0"
+        ],
+        "targetNumber": "6.0",
+        "tolerance": "0.5",
+        "toleranceMode": "absolute-inclusive",
+        "candidateFormat": "A single decimal number in the unit named by the question.",
+        "requiredFactIds": [
+          "cal-072-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-072-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "The new fare is 6.0; 6.51 is outside tolerance.",
+      "edgeCases": [
+        "numeric-outside-tolerance"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-072-f1",
+          "sessionIndex": 1,
+          "text": "Acacia fare was 5.0 dollars.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-072-f2",
+          "sessionIndex": 501,
+          "text": "Replace the Acacia fare with 6.0 dollars.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-073",
+      "ability": "information-extraction",
+      "question": "List the three Aspen errands in the recorded priority order.",
+      "candidateAnswer": "[\"bakery\", \"pharmacy\", \"post office\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"pharmacy\", \"bakery\", \"post office\"]"
+        ],
+        "items": [
+          "pharmacy",
+          "bakery",
+          "post office"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-073-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The right items appear, but the first two are reversed.",
+      "edgeCases": [
+        "ordered-list-permutation"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-073-f1",
+          "sessionIndex": 1,
+          "text": "Aspen errands in priority order are pharmacy, bakery, post office.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-074",
+      "ability": "information-extraction",
+      "question": "List the three Aspen errands in the recorded priority order.",
+      "candidateAnswer": "[\"pharmacy\", \"bakery\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"pharmacy\", \"bakery\", \"post office\"]"
+        ],
+        "items": [
+          "pharmacy",
+          "bakery",
+          "post office"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-074-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The post office is missing from the required three-item list.",
+      "edgeCases": [
+        "ordered-list-partial"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-074-f1",
+          "sessionIndex": 1,
+          "text": "Aspen errands in priority order are pharmacy, bakery, post office.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-075",
+      "ability": "cross-session-reasoning",
+      "question": "List the Dogwood departure, transfer, and destination, in that order.",
+      "candidateAnswer": "[\"Brookford\", \"Hillport\", \"Coastbay\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"Hillport\", \"Brookford\", \"Coastbay\"]"
+        ],
+        "items": [
+          "Hillport",
+          "Brookford",
+          "Coastbay"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-075-f1",
+          "cal-075-f2",
+          "cal-075-f3"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "Departure and transfer are reversed despite correct membership.",
+      "edgeCases": [
+        "ordered-list-permutation"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-075-f1",
+          "sessionIndex": 1,
+          "text": "Dogwood departure is Hillport.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-075-f2",
+          "sessionIndex": 101,
+          "text": "Dogwood transfer is Brookford.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-075-f3",
+          "sessionIndex": 501,
+          "text": "Dogwood destination is Coastbay.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-076",
+      "ability": "cross-session-reasoning",
+      "question": "List the Dogwood departure, transfer, and destination, in that order.",
+      "candidateAnswer": "[\"Hillport\", \"Brookford\", \"Coastbay\", \"Bayend\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"Hillport\", \"Brookford\", \"Coastbay\"]"
+        ],
+        "items": [
+          "Hillport",
+          "Brookford",
+          "Coastbay"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-076-f1",
+          "cal-076-f2",
+          "cal-076-f3"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "Bayend is an extra unsupported stop beyond the three requested values.",
+      "edgeCases": [
+        "ordered-list-extra"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-076-f1",
+          "sessionIndex": 1,
+          "text": "Dogwood departure is Hillport.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-076-f2",
+          "sessionIndex": 101,
+          "text": "Dogwood transfer is Brookford.",
+          "state": "active"
+        },
+        {
+          "factId": "cal-076-f3",
+          "sessionIndex": 501,
+          "text": "Dogwood destination is Coastbay.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-077",
+      "ability": "temporal-reasoning",
+      "question": "Before the change, list the three Holly delivery stops in order.",
+      "candidateAnswer": "[\"depot\", \"clinic\", \"school\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"depot\", \"clinic\", \"school\"]"
+        ],
+        "items": [
+          "depot",
+          "clinic",
+          "school"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-077-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "pass",
+      "justification": "All three historical stops are present in the old order.",
+      "edgeCases": [
+        "ordered-list-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-077-f1",
+          "sessionIndex": 1,
+          "text": "The old Holly route was depot, clinic, school.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-077-f2",
+          "sessionIndex": 501,
+          "text": "The new Holly route is depot, school, clinic.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-078",
+      "ability": "temporal-reasoning",
+      "question": "Before the change, list the three Holly delivery stops in order.",
+      "candidateAnswer": "[\"depot\", \"clinic\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"depot\", \"clinic\", \"school\"]"
+        ],
+        "items": [
+          "depot",
+          "clinic",
+          "school"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-078-f1"
+        ],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "The historical school stop is omitted.",
+      "edgeCases": [
+        "ordered-list-partial"
+      ],
+      "answerability": true,
+      "answerAsOf": "historical",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-078-f1",
+          "sessionIndex": 1,
+          "text": "The old Holly route was depot, clinic, school.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-078-f2",
+          "sessionIndex": 501,
+          "text": "The new Holly route is depot, school, clinic.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-079",
+      "ability": "knowledge-update",
+      "question": "List the current Magnolia packing order after replacement.",
+      "candidateAnswer": "[\"bowls\", \"cups\", \"plates\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"bowls\", \"cups\", \"plates\"]"
+        ],
+        "items": [
+          "bowls",
+          "cups",
+          "plates"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-079-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-079-f1"
+        ]
+      },
+      "goldJudgment": "pass",
+      "justification": "The answer uses the complete replacement order, not the superseded order.",
+      "edgeCases": [
+        "ordered-list-correct"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-079-f1",
+          "sessionIndex": 1,
+          "text": "Magnolia packing used cups, plates, bowls.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-079-f2",
+          "sessionIndex": 101,
+          "text": "Replace Magnolia packing order with bowls, cups, plates.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-080",
+      "ability": "knowledge-update",
+      "question": "List the current Magnolia packing order after replacement.",
+      "candidateAnswer": "[\"bowls\", \"cups\", \"plates\", \"forks\"]",
+      "expected": {
+        "matchType": "ordered-list",
+        "acceptedAnswers": [
+          "[\"bowls\", \"cups\", \"plates\"]"
+        ],
+        "items": [
+          "bowls",
+          "cups",
+          "plates"
+        ],
+        "candidateFormat": "JSON array of strings; compare every element in order, with no missing or extra elements.",
+        "requiredFactIds": [
+          "cal-080-f2"
+        ],
+        "forbiddenFactIds": [
+          "cal-080-f1"
+        ]
+      },
+      "goldJudgment": "fail",
+      "justification": "Forks is an extra item absent from the replacement order.",
+      "edgeCases": [
+        "ordered-list-extra"
+      ],
+      "answerability": true,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": [
+        {
+          "factId": "cal-080-f1",
+          "sessionIndex": 1,
+          "text": "Magnolia packing used cups, plates, bowls.",
+          "state": "superseded"
+        },
+        {
+          "factId": "cal-080-f2",
+          "sessionIndex": 101,
+          "text": "Replace Magnolia packing order with bowls, cups, plates.",
+          "state": "active"
+        }
+      ]
+    },
+    {
+      "probeId": "cal-081",
+      "ability": "abstention",
+      "question": "What is the Juniper garage alarm PIN?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-082",
+      "ability": "abstention",
+      "question": "What is the Juniper garage alarm PIN?",
+      "candidateAnswer": "I am not certain, but it is probably 4931.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value 4931 is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-083",
+      "ability": "abstention",
+      "question": "Who is the Alder technician's emergency contact?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-084",
+      "ability": "abstention",
+      "question": "Who is the Alder technician's emergency contact?",
+      "candidateAnswer": "I am not certain, but it is probably Dana Flint.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value Dana Flint is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-085",
+      "ability": "abstention",
+      "question": "What is the Bracken studio door code?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-086",
+      "ability": "abstention",
+      "question": "What is the Bracken studio door code?",
+      "candidateAnswer": "I am not certain, but it is probably BR-881.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value BR-881 is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-087",
+      "ability": "abstention",
+      "question": "What is the Larch printing partner's tax ID?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-088",
+      "ability": "abstention",
+      "question": "What is the Larch printing partner's tax ID?",
+      "candidateAnswer": "I am not certain, but it is probably TX-5421.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value TX-5421 is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-089",
+      "ability": "abstention",
+      "question": "What is the Rowan meditation instructor's home address?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-090",
+      "ability": "abstention",
+      "question": "What is the Rowan meditation instructor's home address?",
+      "candidateAnswer": "I am not certain, but it is probably 18 River Lane.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value 18 River Lane is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-091",
+      "ability": "abstention",
+      "question": "What is the Cedar parcel courier's birthday?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-092",
+      "ability": "abstention",
+      "question": "What is the Cedar parcel courier's birthday?",
+      "candidateAnswer": "I am not certain, but it is probably 2030-05-12.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value 2030-05-12 is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-093",
+      "ability": "abstention",
+      "question": "What is the Willow outing permit number?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-094",
+      "ability": "abstention",
+      "question": "What is the Willow outing permit number?",
+      "candidateAnswer": "I am not certain, but it is probably WL-922.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value WL-922 is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-095",
+      "ability": "abstention",
+      "question": "What is the Elm decoration depot's insurance policy number?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-096",
+      "ability": "abstention",
+      "question": "What is the Elm decoration depot's insurance policy number?",
+      "candidateAnswer": "I am not certain, but it is probably INS-737.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value INS-737 is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-097",
+      "ability": "abstention",
+      "question": "What is the Aspen pharmacy account password?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-098",
+      "ability": "abstention",
+      "question": "What is the Aspen pharmacy account password?",
+      "candidateAnswer": "I am not certain, but it is probably aspen-secret.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value aspen-secret is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-099",
+      "ability": "abstention",
+      "question": "What is the Dogwood traveler's passport number?",
+      "candidateAnswer": "That information was not provided.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "abstain",
+      "justification": "The requested field was never supplied; the candidate correctly declines to invent a value.",
+      "edgeCases": [
+        "correct-abstention"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    },
+    {
+      "probeId": "cal-100",
+      "ability": "abstention",
+      "question": "What is the Dogwood traveler's passport number?",
+      "candidateAnswer": "I am not certain, but it is probably P-68420.",
+      "expected": {
+        "matchType": "abstain",
+        "acceptedAnswers": [
+          "I do not know.",
+          "That information was not provided."
+        ],
+        "rubric": "No factual answer exists in the evidence. An explicit refusal is abstain and counts as a correct abstention. Any asserted value, including a hedged guess, is fail.",
+        "requiredFactIds": [],
+        "forbiddenFactIds": []
+      },
+      "goldJudgment": "fail",
+      "justification": "No evidence supplies the requested field. The hedged value P-68420 is still an unsupported factual answer.",
+      "edgeCases": [
+        "unsupported-answer"
+      ],
+      "answerability": false,
+      "answerAsOf": "current",
+      "afterSessionIndex": 1000,
+      "evidence": []
+    }
+  ]
+}

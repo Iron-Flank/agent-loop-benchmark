@@ -6,6 +6,140 @@ generator, and core execution harness. Scoring and participating runtimes are
 separate tasks. Offline smoke responses are not scored benchmark answers or a
 claim of model accuracy.
 
+## Frozen scorer calibration content
+
+[`calibration/scorer-v1.0.0`](calibration/scorer-v1.0.0) contains the BCH-014
+calibration corpus, independently authored from the fixture generator's topic
+and lifecycle patterns, not sampled from canonical fixtures:
+
+- `probes.json`: 100 manually agent-labeled candidates, 20 per primary ability.
+  Match types: 40 semantic, 16 exact, 16 numeric, 8 ordered-list, 20 abstain.
+- `review.json`: second-pass review of all 100 labels, coverage counts, and
+  canonical-separation evidence. Author and reviewer are the same agent; this
+  is not a claim of independent human annotation.
+- `manifest.json`: frozen file SHA-256 digests and scorer-version association.
+  **Scorer 1.0.0 is reserved for BCH-007**, not an implemented or calibrated
+  scorer. BCH-007 owns the actual agreement gate; no 95% agreement is claimed here.
+
+Each calibration row includes a question, candidate answer, expected record,
+gold judgment, justification, edge-case tags, and an independently authored
+miniature evidence fixture (`evidence`, `afterSessionIndex`, `answerAsOf`).
+Evidence facts have local IDs, introduction session indices, text, and lifecycle
+states. They remain available across sessions; expired/superseded facts support
+historical questions but not current answers. These calibration envelopes are
+not canonical replay fixtures and must not be passed to `SchemaValidator` or a
+runtime adapter. Generator 1.0.0 emits only exact, ordered-list, and abstain;
+the independently authored numeric/semantic records extend its core expected
+fields to cover the initiative's complete match taxonomy.
+
+Expected-record rules:
+
+- `requiredFactIds` and `forbiddenFactIds` resolve within the row's evidence.
+- Exact answers trim surrounding whitespace only; case and punctuation matter.
+- Ordered-list answers are JSON arrays; all items must match in the declared order,
+  without missing or extra items. `acceptedAnswers` retains the fixture format
+  of JSON-array strings; `items` is the decoded comparison target.
+- Numeric answers are single decimal numbers in the question's units.
+  `targetNumber` and `tolerance` are decimal strings. `absolute-inclusive` means
+  `abs(candidate - target) <= tolerance`, including both tolerance edges.
+- Semantic answers must convey every `requiredClaims` entry and assert no
+  `disallowedContradictions`; the versioned `rubric` states the matching policy.
+- Gold `abstain` means the candidate declines without a substantive answer,
+  **not** that the answer is necessarily correct. With `answerability: false`
+  it is a correct abstention; with evidence it is a false abstention. A hedged
+  factual guess without evidence is `fail`. Preserve the tri-state labels when
+  measuring judge agreement; report abstention correctness separately.
+
+The set includes 8 each of semantic near misses, correct paraphrases,
+contradictions, false abstentions, and numeric tolerance boundaries; 10 each of
+correct abstentions and unsupported answers; and 2 each of list permutations,
+partial lists, extra-item lists, and correct lists. A second pass confirmed every
+label and justification, including independent decimal arithmetic for boundaries.
+Comparison against all 11,989 possible generator-1.0.0 question strings establishes
+zero identical canonical probes for any public or held-out seed, without reading
+private fixtures or seeds. Recheck separation when generator templates change.
+
+Do not rewrite these files when changing the scorer. Retain the frozen labels
+with scorer 1.0.0; later scorers reference the same set. A label correction requires
+an additive calibration-set version, retaining the previous files and association.
+The manifest hashes detect edits; they do not provide filesystem write protection.
+
+Reproduce the offline content smoke check from the checkout (no model or API key):
+
+```sh
+python3 - <<'PY'
+from collections import Counter
+from decimal import Decimal
+import hashlib
+import json
+from pathlib import Path
+from almm_fixture.topics import TopicPool
+
+root = Path("calibration/scorer-v1.0.0")
+manifest = json.loads((root / "manifest.json").read_text())
+for name, digest in manifest["files"].items():
+    assert hashlib.sha256((root / name).read_bytes()).hexdigest() == digest, name
+data = json.loads((root / "probes.json").read_text())
+review = json.loads((root / "review.json").read_text())
+probes = data["probes"]
+assert data["frozen"] and len(probes) == 100
+assert len({p["probeId"] for p in probes}) == 100
+assert len(review["records"]) == 100 and review["result"] == "passed"
+abilities = Counter(p["ability"] for p in probes)
+matches = Counter(p["expected"]["matchType"] for p in probes)
+edges = Counter(tag for p in probes for tag in p["edgeCases"])
+assert len(abilities) == 5 and min(abilities.values()) >= 10
+assert set(matches) == {"exact", "numeric", "ordered-list", "semantic", "abstain"}
+assert matches["semantic"] >= 0.30 * len(probes)
+for tag in ("near-miss", "paraphrased-correct", "contradictory",
+            "correct-abstention", "false-abstention", "unsupported-answer",
+            "numeric-tolerance-boundary", "ordered-list-permutation",
+            "ordered-list-partial", "ordered-list-extra"):
+    assert edges[tag] >= 2, tag
+for p, checked in zip(probes, review["records"]):
+    assert checked["probeId"] == p["probeId"]
+    assert checked["confirmedGoldJudgment"] == p["goldJudgment"]
+    assert checked["justificationConsistent"] and checked["evidenceConsistent"]
+    assert all(p[k] for k in ("question", "candidateAnswer", "expected",
+                              "goldJudgment", "justification"))
+    e = p["expected"]
+    ids = {f["factId"] for f in p["evidence"]}
+    assert set(e["requiredFactIds"] + e["forbiddenFactIds"]) <= ids
+    assert not set(e["requiredFactIds"]) & set(e["forbiddenFactIds"])
+    assert all(f["sessionIndex"] < p["afterSessionIndex"] for f in p["evidence"])
+    if e["matchType"] == "numeric":
+        good = abs(Decimal(p["candidateAnswer"]) - Decimal(e["targetNumber"])) <= Decimal(e["tolerance"])
+        assert p["goldJudgment"] == ("pass" if good else "fail")
+    elif e["matchType"] == "exact":
+        good = p["candidateAnswer"].strip() in e["acceptedAnswers"]
+        assert p["goldJudgment"] == ("pass" if good else "fail")
+    elif e["matchType"] == "ordered-list":
+        good = json.loads(p["candidateAnswer"]) == e["items"]
+        assert p["goldJudgment"] == ("pass" if good else "fail")
+    elif e["matchType"] == "abstain":
+        assert not p["answerability"] and not ids
+        good = p["candidateAnswer"] in e["acceptedAnswers"]
+        assert p["goldJudgment"] == ("abstain" if good else "fail")
+    else:
+        assert e["rubric"] and e["requiredClaims"] and e["disallowedContradictions"]
+questions = {"What is my emergency verification phrase? I have not shared it."}
+topics = TopicPool().topics
+for t in topics:
+    questions.update((f"What is the {t.slot_name} for {t.label}?",
+                      f"Before it expired, what was the {t.slot_name} for {t.label}?",
+                      f"What is the current {t.slot_name} for {t.label}, after the change?"))
+    for other in topics:
+        questions.add(f"List the values for {t.label} and {other.label}, in that order.")
+assert not questions & {p["question"] for p in probes}
+print("PASS:", len(probes), "probes;", dict(abilities), dict(matches))
+print("Frozen hashes, review coverage, atomic labels, edge coverage and canonical separation: PASS")
+PY
+```
+
+This smoke check corroborates structure and deterministic labels; semantic label
+quality still depends on reviewing the evidence, rubrics, candidates, and
+justifications. It does not call or calibrate a semantic judge.
+
 ## Quick start
 
 Python 3.11 or later. Adapter smoke and fixture generation use only the standard library.
