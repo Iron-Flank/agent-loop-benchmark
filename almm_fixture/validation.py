@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 
 
 ABILITIES = frozenset({
@@ -210,7 +211,7 @@ class SchemaValidator:
             _object(expected, expected_path, (
                 'matchType', 'acceptedAnswers', 'requiredFactIds', 'forbiddenFactIds',
             ))
-            _choice(expected['matchType'], {'exact', 'ordered-list', 'abstain'},
+            _choice(expected['matchType'], {'exact', 'ordered-list', 'numeric', 'semantic', 'abstain'},
                     f'{expected_path}.matchType')
             for field in ('acceptedAnswers', 'requiredFactIds', 'forbiddenFactIds'):
                 _strings(expected[field], f'{expected_path}.{field}')
@@ -260,11 +261,31 @@ class SchemaValidator:
                     raise ValueError(f'{expected_path}.forbiddenFactIds: knowledge-update needs exactly '
                                      'the old supersession chain')
             if (probe['ability'] == 'cross-session-reasoning'
-                    and expected['matchType'] != 'ordered-list'):
-                raise ValueError(f'{expected_path}.matchType: cross-session-reasoning requires ordered-list')
+                    and expected['matchType'] not in {'ordered-list', 'semantic'}):
+                raise ValueError(f'{expected_path}.matchType: cross-session-reasoning requires ordered-list or semantic')
             if expected['matchType'] == 'exact':
                 if len(required) != 1 or answers != [facts[required[0]]['value']]:
                     raise ValueError(f'{expected_path}.acceptedAnswers: exact answer must equal its single fact value')
+            elif expected['matchType'] == 'numeric':
+                if len(required) != 1 or not answers:
+                    raise ValueError(f'{expected_path}: numeric requires one fact and accepted answers')
+                try:
+                    target = Decimal(facts[required[0]]['value'])
+                    tolerance = Decimal(str(expected.get('tolerance', 0)))
+                    accepted = [Decimal(answer) for answer in answers]
+                    if (not target.is_finite() or not tolerance.is_finite() or tolerance < 0
+                            or any(not number.is_finite() or number != target for number in accepted)):
+                        raise ValueError('nonfinite or inconsistent numeric record')
+                    if 'targetNumber' in expected and Decimal(str(expected['targetNumber'])) != target:
+                        raise ValueError('targetNumber differs from fact')
+                except (InvalidOperation, ValueError, TypeError) as error:
+                    raise ValueError(f'{expected_path}: invalid numeric target or tolerance') from error
+            elif expected['matchType'] == 'semantic':
+                _string(expected.get('rubric'), f'{expected_path}.rubric')
+                _strings(expected.get('requiredClaims'), f'{expected_path}.requiredClaims')
+                _strings(expected.get('disallowedContradictions'), f'{expected_path}.disallowedContradictions')
+                if not expected['requiredClaims'] or not answers:
+                    raise ValueError(f'{expected_path}.requiredClaims: semantic requires claims and accepted answers')
             else:
                 values = [facts[fact_id]['value'] for fact_id in sorted(required)]
                 if not answers:

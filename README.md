@@ -2,9 +2,9 @@
 
 ALMM measures runtime memory quality as conversation histories accumulate.
 This checkout supplies the **RuntimeAdapter 1.0 contract**, deterministic fixture
-generator, and core execution harness. Scoring and participating runtimes are
-separate tasks. Offline smoke responses are not scored benchmark answers or a
-claim of model accuracy.
+generator, core execution harness, and versioned scoring pipeline. Participating
+runtimes are separate tasks. Offline smoke responses are not canonical benchmark
+answers or a claim of model accuracy.
 
 ## Frozen scorer calibration content
 
@@ -18,8 +18,8 @@ and lifecycle patterns, not sampled from canonical fixtures:
   canonical-separation evidence. Author and reviewer are the same agent; this
   is not a claim of independent human annotation.
 - `manifest.json`: frozen file SHA-256 digests and scorer-version association.
-  **Scorer 1.0.0 is reserved for BCH-007**, not an implemented or calibrated
-  scorer. BCH-007 owns the actual agreement gate; no 95% agreement is claimed here.
+  Scorer 1.0.0 is implemented by BCH-007. This agent-authored corpus can calibrate
+  development runs, but cannot establish grader-human agreement or canonical approval.
 
 Each calibration row includes a question, candidate answer, expected record,
 gold judgment, justification, edge-case tags, and an independently authored
@@ -35,7 +35,8 @@ fields to cover the initiative's complete match taxonomy.
 Expected-record rules:
 
 - `requiredFactIds` and `forbiddenFactIds` resolve within the row's evidence.
-- Exact answers trim surrounding whitespace only; case and punctuation matter.
+- Scorer exact answers use Unicode NFKC, casefolding, and collapsed whitespace.
+  Punctuation remains significant; no substring or fuzzy acceptance.
 - Ordered-list answers are JSON arrays; all items must match in the declared order,
   without missing or extra items. `acceptedAnswers` retains the fixture format
   of JSON-array strings; `items` is the decoded comparison target.
@@ -139,6 +140,110 @@ PY
 This smoke check corroborates structure and deterministic labels; semantic label
 quality still depends on reviewing the evidence, rubrics, candidates, and
 justifications. It does not call or calibrate a semantic judge.
+
+## Scoring immutable run archives
+
+```sh
+python3 -m almm_scorer --smoke
+```
+
+The offline command executes ten accumulated sessions, 100 turns and 105 runtime
+requests, then calibrates on 100 independent **synthetic smoke** labels and scores
+five probes. It exercises 41 loopback HTTP judge calls, including a semantic
+per-probe artifact, a correct abstention and four false abstentions. Its 100%
+synthetic agreement is explicitly noncanonical, not grader-human agreement.
+Temporary artifacts and mock credentials are removed when the command finishes.
+
+For real scoring, provide a scoring configuration manifest:
+
+```json
+{
+  "scorerVersion": "1.0.0",
+  "canonical": true,
+  "calibrationDirectory": "/private/human-reviewed-calibration",
+  "runtimeKeyEnv": "OPENAI_API_KEY",
+  "judge": {
+    "provider": "openai-compatible",
+    "model": "judge-model-family",
+    "version": "provider-pinned-model-snapshot",
+    "rubricVersion": "1.0",
+    "temperature": 0,
+    "keyEnv": "ALMM_JUDGE_API_KEY",
+    "endpoint": "https://api.openai.com/v1/chat/completions"
+  }
+}
+```
+
+Use actual provider model identities, not the illustrative strings above. Set
+`ALMM_JUDGE_API_KEY` in the environment; it must differ from the runtime key's
+environment variable and value. No key belongs in either manifest. Judge requests
+use the pinned `version` as their wire model (or an explicitly pinned
+`resolvedModel`); a differing provider-reported identity aborts scoring.
+Temperature defaults to zero. If the provider cannot accept temperature, replace
+`temperature` with `"temperatureUnavailable": true`; this is recorded, not silently
+retried with different settings. Providers must support OpenAI-compatible
+structured-JSON chat responses. Failures abort publication; no fuzzy fallback.
+
+```sh
+python3 -m almm_scorer --fixture /private/full-fixture.json \
+  --run /artifacts/finalized-run-directory \
+  --manifest /private/scoring-config.json --output /artifacts/scored
+```
+
+`ScoringPipeline` reuses fixture validation, manifest identity checks and the
+declared tokenizer to retokenize **every** archived request before calibration or
+scoring. Forged counts, changed stable prefixes, missing/revised identities and
+requests above 25,000 tokens halt scoring. Turn-request payloads are streamed,
+retaining compact request hashes rather than full turn contexts. Archived budget
+failures also halt this strict scoring preflight; valid provider/adapter/timeout
+failures and unattempted probes remain incomplete, outside the accuracy denominator.
+Character-count tokenization is smoke-only and cannot produce canonical results.
+
+Deterministic types make no judge calls: exact whole-answer normalization,
+ordered JSON arrays preserving order/count, finite decimal numbers with only the
+declared absolute inclusive tolerance (default zero), and exactly accepted
+abstention language. Abstention judgment and correctness are separate. Semantic
+JSON includes `judgment`, aligned `requiredClaimCoverage` and `contradictionFlags`
+boolean arrays, and finite `confidence` in [0,1]. A pass with missing claims or
+contradictions is rejected. Rubrics and gold facts never cross the runtime adapter
+boundary; the judge receives only the scoring rubric, question and candidate.
+
+The agreement gate verifies frozen corpus/review hashes, 90–110 rows, all five
+abilities (at least ten each), every match type, and at least 30% semantic rows.
+It evaluates the current scorer on every label each time; 95% is inclusive and
+94% rejects. Agreement compares pass/fail/abstain judgments, not correctness.
+Approvals bind scorer version, full judge configuration and corpus hashes.
+
+**Canonical activation prerequisite:** the shipped BCH-014 labels explicitly
+have no human reviewer. Do not relabel or edit this frozen corpus to bypass the
+gate. An independently human-labeled and reviewed, separately frozen set must
+declare `labelProvenance: {"kind":"human","labelerId":"..."}` in `probes.json`
+and `reviewProvenance: {"kind":"human","reviewerId":"..."}` in `review.json`.
+Identities must correspond to actual human work; provenance fields are a recorded
+attestation, not cryptographic proof. The shipped corpus is pinned against
+rebranding as human. Until that prerequisite is supplied, use `"canonical": false`
+and the existing calibration directory only for explicitly noncanonical development
+runs. No actual grader-human agreement or real-provider calibration is claimed.
+
+Published outputs are additive, read-only files at:
+
+```text
+<output>/<source-manifest-sha256>/<scorer-version>-<scoring-identity-hash>/
+  manifest.json
+  scores.jsonl
+```
+
+Each row retains raw answer, matching method, normalized judgment/correctness,
+structured judge output (semantic only), request-token telemetry, fixture hash,
+source manifest hash and scorer version. The scoring manifest records the actual
+scorer version, source version, scorer source-content hash, judge configuration
+and calibration report. Source run artifacts are never changed; an existing
+scoring identity cannot be replaced. Different scorer versions/configurations
+produce separate artifacts. Retain old scorer source revisions in Git alongside
+their artifact `scorerHash`; reapply that revision to the original run directory
+for longitudinal rescoring. New versions must not remove old artifacts, fixtures
+or calibration sets.
+
 
 ## Quick start
 
