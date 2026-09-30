@@ -18,13 +18,7 @@ from .writer import ReportWriter, comparability
 
 class _ProvenanceAdapter(_Adapter):
     def answerProbe(self, probe):
-        self.sequence += 1
-        request = {'requestId': str(self.sequence), 'segments': [
-            {'tier': 'stable', 'content': self.prefix, 'tokenCount': len(self.prefix)},
-            {'tier': 'unstable', 'content': probe['question'], 'tokenCount': len(probe['question']),
-             'sourceIds': self.turns[-1:]}]}
-        answer = self.proxy(request)
-        return {'answer': answer, 'requests': [request]}
+        return self._respond(probe['question'], 'answer', self.turns[-1:])
 
 
 def _judge_transport(request, timeout):
@@ -55,14 +49,16 @@ def smoke():
         with patch.dict(os.environ, {'ALMM_JUDGE_API_KEY': 'offline-smoke-credential'}):
             for scale in (10, 100, 500, 1000):
                 manifest = {'runId': f'report-smoke-{scale}',
-                            'adapter': {'name': 'report-smoke', 'revision': '1', 'contractVersion': '1.0'},
+                            'adapter': {'name': 'report-smoke', 'revision': '2', 'contractVersion': '2.0'},
+                            'nativeModelEnvelopeVersion': '1.0',
                             'model': {'provider': 'offline-smoke', 'name': 'offline', 'version': '1',
                                       'decoding': {'temperature': 0}, 'deterministic': True},
                             'tokenizer': {'name': 'characters-smoke', 'version': '1'},
                             'stablePrefix': ['ALMM smoke'], 'seed': 42, 'scorerVersion': 'unscored-1',
                             'rateLimitRpm': 1000000, 'probeTimeoutSeconds': 10}
                 proxy = ModelProxy(manifest, BudgetVerifier(manifest, len),
-                                   lambda payload: {'answer': 'I do not know.'})
+                                   lambda payload: {'content': 'I do not know.', 'finishReason': 'stop',
+                                                    'usage': {'promptTokens': 0, 'completionTokens': 0}})
                 adapter = _ProvenanceAdapter(proxy)
                 fixture = generate(42, scale)
                 run = FixtureRunner(manifest, adapter, proxy, root / 'runs').run(fixture)

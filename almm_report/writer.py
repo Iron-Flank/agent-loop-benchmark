@@ -22,10 +22,10 @@ from .metrics import build_report
 _ARTIFACTS = ('probes.jsonl', 'requests.jsonl', 'scores.jsonl', 'report.json')
 _CONFIG_KEYS = ('runId', 'adapter', 'model', 'tokenizer', 'stablePrefix', 'seed',
                 'scorerVersion', 'harnessHash', 'fixtureHash', 'rateLimitRpm',
-                'probeTimeoutSeconds')
+                'probeTimeoutSeconds', 'nativeModelEnvelopeVersion')
 _IDENTITY_KEYS = ('fixtureHash', 'harnessHash', 'adapter', 'model', 'tokenizer',
                   'scorerVersion', 'scorerHash', 'judge', 'calibrationHashes',
-                  'seed', 'concurrency')
+                  'seed', 'concurrency', 'nativeModelEnvelopeVersion')
 _REQUIRED = (
     'schemaVersion', 'runId', 'adapter', 'runtime', 'model', 'tokenizer',
     'stablePrefix', 'stablePrefixHash', 'seed', 'timestamp', 'harnessHash',
@@ -34,7 +34,7 @@ _REQUIRED = (
     'everyRequestTierTotals', 'sourceManifestHash', 'sourceScorerVersion',
     'scorerVersion', 'scorerHash', 'scoringHash', 'judge', 'canonical',
     'calibration', 'calibrationHashes', 'scoredAt', 'sourceConfiguration',
-    'sessionCount', 'concurrency', 'actualRunTimeSeconds',
+    'sessionCount', 'concurrency', 'actualRunTimeSeconds', 'nativeModelEnvelopeVersion',
     'effectiveThroughputRequestsPerSecond', 'artifactSizeBytes',
     'interruptionResumeHistory', 'providerVersionPinned', 'artifactHashes', 'warnings',
 )

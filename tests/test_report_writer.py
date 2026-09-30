@@ -127,10 +127,10 @@ class ReportWriterTests(unittest.TestCase):
 
         def provider(payload):
             nonlocal interrupted
-            if not interrupted and payload['request']['segments'][-1]['sourceIds'] == ['t-0002-03']:
+            if not interrupted and payload['request']['tierSegments'][-1]['sourceIds'] == ['t-0002-03']:
                 interrupted = True
                 raise KeyboardInterrupt('process interruption')
-            return {'answer': 'ok'}
+            return {'content': 'ok', 'finishReason': 'stop', 'usage': {'promptTokens': 0, 'completionTokens': 0}}
 
         with tempfile.TemporaryDirectory() as root:
             fixture = generate(42, 10)

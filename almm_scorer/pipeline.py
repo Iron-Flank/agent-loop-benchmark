@@ -8,7 +8,8 @@ from pathlib import Path
 import shutil
 import tempfile
 
-from almm_adapter.contract import validate_manifest
+from almm_adapter.contract import validate_manifest, validate_native_response
+from almm_adapter.native import archived_request
 from almm_fixture.engine import canonical_json
 from almm_fixture.validation import SchemaValidator
 from almm_harness.budget import BudgetVerifier
@@ -77,7 +78,8 @@ def preflight(fixture, source):
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
             raise ValueError(f'manifest.{key}: positive finite number required')
     configuration = {key: manifest[key] for key in (
-        'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix', 'seed', 'scorerVersion',
+        'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix',
+        'nativeModelEnvelopeVersion', 'seed', 'scorerVersion',
         'harnessHash', 'fixtureHash', 'rateLimitRpm', 'probeTimeoutSeconds')}
     # Retain support for immutable archives created before concurrency metadata.
     if 'concurrency' in manifest:
@@ -89,7 +91,7 @@ def preflight(fixture, source):
     totals = []
     for request in _rows(source / 'requests.jsonl'):
         try:
-            normalized = verifier.verify(request)
+            normalized = verifier.verify(archived_request(request))
         except BudgetFailure as error:
             # An honestly rejected request is execution telemetry, not invalid gold.
             if request.get('status') != 'error' or request.get('category') != 'budget':
@@ -100,11 +102,13 @@ def preflight(fixture, source):
         rid = request['requestId']
         if rid in by_request:
             raise ValueError('duplicate requestId in request telemetry')
-        for field in ('totalTokens', 'tierTokens', 'requestOverheadTokens', 'stablePrefixHash', 'segments'):
+        for field in ('totalTokens', 'tierTokens', 'requestOverheadTokens', 'stablePrefixHash', 'tierSegments'):
             if normalized[field] != request.get(field):
                 raise ValueError(f'request telemetry differs from retokenization: {rid}.{field}')
         if request.get('status') not in {'ok', 'error'}:
             raise ValueError('request telemetry requires ok/error status')
+        if request['status'] == 'ok':
+            validate_native_response(request.get('response'))
         # Retain compact identities, not full turn contexts, at 1000-session scale.
         without_checkpoint = {k: v for k, v in request.items() if k not in {'sessionId', 'probeId', 'turnId'}}
         by_request[rid] = {'probeId': request.get('probeId'), 'status': request['status'],

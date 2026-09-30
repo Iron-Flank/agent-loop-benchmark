@@ -39,7 +39,7 @@ class ScoringTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             fixture, source = archive(root)
             rows = [json.loads(line) for line in (source / 'requests.jsonl').read_text().splitlines()]
-            rows[-1]['segments'][-1]['content'] = 'x' * 25001
+            rows[-1]['tierSegments'][-1]['content'] = 'x' * 25001
             path = source / 'requests.jsonl'
             path.chmod(0o644)
             path.write_bytes(b''.join(canonical_json(row) for row in rows))
@@ -103,9 +103,9 @@ class ScoringTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             fixture = generate(42, 10)
             def provider(payload):
-                if payload['request']['segments'][-1].get('sourceIds', [''])[0].startswith('p-'):
+                if payload['request']['tierSegments'][-1].get('sourceIds', [''])[0].startswith('p-'):
                     raise ProviderFailure('offline')
-                return {'answer': 'ok'}
+                return {'content': 'ok', 'finishReason': 'stop', 'usage': {'promptTokens': 0, 'completionTokens': 0}}
             runner, _, _ = make_runner(root, manifest(), provider)
             source = Path(runner.run(fixture)['artifactDir'])
             with patch('almm_scorer.pipeline.CalibrationGate.evaluate', return_value={'approved': True}):

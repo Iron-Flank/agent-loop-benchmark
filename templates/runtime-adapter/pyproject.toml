@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "almm-custom-adapter"
 version = "0.1.0"
 requires-python = ">=3.11"
-dependencies = ["almm-adapter==1.0.0"]
+dependencies = ["almm-adapter==2.0.0"]
 
 [tool.setuptools]
 py-modules = ["adapter"]

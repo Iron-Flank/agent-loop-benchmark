@@ -65,9 +65,13 @@ def _failure(error):
 
 
 def _request_identity(request):
-    return (request['requestId'], [(segment['tier'], segment['content'],
-                                   segment.get('sourceIds', []))
-                                  for segment in request['segments']])
+    # Compare the complete native interaction, not just claimed tier text.
+    identity = deepcopy({key: request[key] for key in (
+        'requestId', 'messages', 'tools', 'toolCalls', 'toolResults',
+        'tierSegments', 'model', 'decodingSettings', 'seed') if key in request})
+    for segment in identity['tierSegments']:
+        segment.pop('tokenCount', None)
+    return identity
 
 
 class ProbeRunner:
@@ -113,7 +117,7 @@ class FixtureRunner:
     Final artifacts are immutable. Interrupted sessions are rolled back to byte
     offsets stored with the last fully completed session, then completed sessions
     (including probes) are replayed through a newly initialized adapter. Replay
-    uses verified archived model answers, without provider calls or rescoring.
+    uses verified archived native responses, without provider calls or rescoring.
     """
 
     def __init__(self, manifest, adapter, proxy, artifact_dir):
@@ -231,7 +235,7 @@ class FixtureRunner:
         if kind == 'probe':
             sources = list(dict.fromkeys(
                 source for request in telemetry
-                for segment in (request.get('segments') if isinstance(request.get('segments'), list)
+                for segment in (request.get('tierSegments') if isinstance(request.get('tierSegments'), list)
                                 else [])
                 if isinstance(segment, dict) and isinstance(segment.get('sourceIds', []), list)
                 for source in segment.get('sourceIds', []) if isinstance(source, str)))
@@ -253,7 +257,8 @@ class FixtureRunner:
             self.proxy.begin_run()
             # Adapter manifests are allowlisted as well; no fixture gold is passed.
             manifest = {key: deepcopy(self.manifest[key]) for key in
-                        ('runId', 'adapter', 'model', 'tokenizer', 'stablePrefix')}
+                        ('runId', 'adapter', 'model', 'tokenizer', 'stablePrefix',
+                         'nativeModelEnvelopeVersion')}
             self.adapter.initialize(manifest)
         except Exception as error:
             raise _failure(error) from error
@@ -267,7 +272,8 @@ class FixtureRunner:
             raise ValueError('fixture contentHash does not match fixture content')
         view = validate_adapter_input(fixture, adapter_input_path)
         configuration = {key: deepcopy(self.manifest[key]) for key in (
-            'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix', 'seed', 'scorerVersion', 'concurrency')}
+            'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix',
+            'nativeModelEnvelopeVersion', 'seed', 'scorerVersion', 'concurrency')}
         configuration.update(harnessHash=_harness_hash(), fixtureHash=fixture_hash,
                              rateLimitRpm=self.manifest.get('rateLimitRpm', 60),
                              probeTimeoutSeconds=self.manifest.get('probeTimeoutSeconds', 60))

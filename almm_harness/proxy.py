@@ -10,6 +10,9 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
+from almm_adapter.contract import validate_native_response
+from almm_adapter.native import ARCHIVE_FIELDS, archived_request, canonical_wire, response_text
+
 from .errors import AdapterFailure, HarnessFailure, ProviderFailure, TimeoutFailure
 
 MAX_RETRIES = 3
@@ -77,7 +80,7 @@ class ModelProxy:
     """Callable model boundary; each instance owns a thread-safe token bucket.
 
     Provider payload is ``{'model': pinned_model_config, 'request': normalized}``.
-    A provider returns ``{'answer': str, 'inputTokens'?: int, 'modelVersion'?: str}``.
+    A provider returns a NativeModelResponse, including structured calls and usage.
     Rate limits allow an initial burst of RPM tokens, refilling at RPM / 60.
     First-attempt throttling is bounded by the runner's wall timeout, not retry
     policy. Retries back off 1/2/4 seconds, with 30 seconds of total retry waits.
@@ -131,10 +134,19 @@ class ModelProxy:
         with self._state_lock:
             if self._active or self._aborted:
                 raise AdapterFailure('cannot replay with active calls or an aborted run')
-            if not isinstance(records, list) or any(
-                    not isinstance(row, dict) or row.get('status') != 'ok' or
-                    not isinstance(row.get('answer'), str) for row in records):
-                raise AdapterFailure('replay requires successful requests with archived answers')
+            if not isinstance(records, list):
+                raise AdapterFailure('replay requires successful native request/response archives')
+            for row in records:
+                try:
+                    if not isinstance(row, dict) or row.get('status') != 'ok':
+                        raise ValueError('archive must contain a successful request')
+                    validate_native_response(row.get('response'))
+                    canonical_wire(archived_request(row))
+                    if ('modelVersion' in row['response'] and
+                            row['response']['modelVersion'] != self.manifest['model']['version']):
+                        raise ValueError('archived response modelVersion does not match pinned version')
+                except (ValueError, TypeError, KeyError) as exc:
+                    raise AdapterFailure('invalid native replay archive: ' + self.redact(str(exc))) from None
             self._replay_records = deepcopy(records)
             self._replay_index = 0
 
@@ -209,6 +221,8 @@ class ModelProxy:
             # Verifier may keep stable-prefix state, so serialize only verification.
             with self._state_lock:
                 try:
+                    if isinstance(request, dict) and request.keys() & ARCHIVE_FIELDS:
+                        raise ValueError('native model request cannot contain archive metadata')
                     normalized = self.budget.verify(request)
                 except ValueError as exc:
                     raise AdapterFailure(redact(str(exc), secrets)) from None
@@ -218,11 +232,11 @@ class ModelProxy:
                     if self._replay_index >= len(self._replay_records):
                         raise AdapterFailure('replay produced an extra model request')
                     recorded = self._replay_records[self._replay_index]
-                    if any(recorded.get(key) != value for key, value in normalized.items()):
+                    if archived_request(recorded) != normalized:
                         raise AdapterFailure('replayed model request differs from archived request')
                     self._replay_index += 1
                     self.telemetry.append(redact(recorded, secrets))
-                    return recorded['answer']
+                    return deepcopy(recorded['response'])
             for retry in range(MAX_RETRIES + 1):
                 self._check_running()
                 delay = self._token_delay()
@@ -246,22 +260,23 @@ class ModelProxy:
                     item.update(status='error', error=redact(str(exc), secrets))
                     raise
                 self._check_running()
-                if not isinstance(result, dict):
-                    raise ProviderFailure('provider result must be an object')
-                if 'inputTokens' in result:
-                    if type(result['inputTokens']) is not int or result['inputTokens'] < 0:
-                        raise ProviderFailure('provider inputTokens must be a nonnegative integer')
-                    reported['providerTokens'] = result['inputTokens']
+                try:
+                    validate_native_response(result)
+                except ValueError as exc:
+                    raise ProviderFailure('invalid native provider response: ' +
+                                          redact(str(exc), secrets)) from None
+                reported['providerTokens'] = result['usage']['promptTokens']
+                reported['response'] = deepcopy(result)
                 if 'modelVersion' in result:
                     reported['modelVersion'] = result['modelVersion']
                     if result['modelVersion'] != self.manifest['model']['version']:
                         raise ProviderFailure('provider modelVersion does not match pinned model version')
-                if not isinstance(result.get('answer'), str):
-                    raise ProviderFailure('provider result must contain a string answer')
                 item['status'] = 'ok'
-                reported['answer'] = result['answer']
+                text = response_text(result)
+                if text:
+                    reported['answer'] = text
                 self._archive(normalized, started, waited, attempts, history, reported, secrets)
-                return result['answer']
+                return deepcopy(result)
         except Exception as exc:
             if not isinstance(exc, HarnessFailure):
                 category = TimeoutFailure if isinstance(exc, TimeoutError) else ProviderFailure
@@ -314,10 +329,9 @@ class OpenAICompatibleProvider:
     ``timeout`` bounds each HTTP attempt. An optional urllib-compatible ``opener``
     accepts (Request, timeout=seconds), useful for boundary tests.
 
-    Sends model.version as the pinned wire model, model.decoding unchanged, and
-    optional model.seed. Exactly concatenated segments form one user message;
-    the manifest tokenizer.requestOverheadTokens must account for this provider's
-    chat framing. Response usage.prompt_tokens and model become proxy telemetry.
+    Sends the canonical native envelope wire body without flattening messages,
+    tool schemas, calls, or results. Response usage and model are preserved in
+    the native response; arguments are decoded into structured objects.
     Redirects are rejected to protect credentials.
     """
     def __init__(self, endpoint='https://api.openai.com/v1/chat/completions',
@@ -342,16 +356,13 @@ class OpenAICompatibleProvider:
         key = os.environ.get(self.api_key_env)
         if not key:
             raise ProviderFailure(f'provider environment variable {self.api_key_env} is unset')
-        model = payload['model']
-        decoding = deepcopy(model['decoding'])
-        if {'model', 'messages', 'seed', 'stream'} & decoding.keys():
-            raise ProviderFailure('decoding cannot override pinned model, messages, seed or stream')
-        body = dict(decoding, model=model['version'], messages=[{
-            'role': 'user',
-            'content': ''.join(segment['content'] for segment in payload['request']['segments'])}])
-        if 'seed' in model:
-            body['seed'] = model['seed']
-        req = Request(self.endpoint, data=json.dumps(body).encode('utf-8'),
+        try:
+            if payload['model'] != payload['request']['model']:
+                raise ValueError('provider model differs from native request model')
+            body = canonical_wire(payload['request'])
+        except (ValueError, TypeError, KeyError) as exc:
+            raise ProviderFailure('invalid native provider request: ' + redact(str(exc))) from None
+        req = Request(self.endpoint, data=body.encode('utf-8'),
                       headers={'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key})
         secrets = _secrets() + [key]
         try:
@@ -367,15 +378,32 @@ class OpenAICompatibleProvider:
         except Exception as exc:
             raise ProviderFailure(redact(str(exc), secrets)) from None
         try:
-            answer = result['choices'][0]['message']['content']
-            if not isinstance(answer, str):
-                raise ValueError('provider answer must be a string')
-            normalized = {'answer': answer}
-            usage = result.get('usage')
-            if isinstance(usage, dict) and 'prompt_tokens' in usage:
-                normalized['inputTokens'] = usage['prompt_tokens']
+            choice = result['choices'][0]
+            message = choice['message']
+            usage = result['usage']
+            normalized = {
+                'content': deepcopy(message['content']),
+                'finishReason': choice['finish_reason'],
+                'usage': {'promptTokens': usage['prompt_tokens'],
+                          'completionTokens': usage['completion_tokens']}}
+            if 'tool_calls' in message:
+                calls = message['tool_calls']
+                if not isinstance(calls, list):
+                    raise ValueError('provider tool_calls must be an array')
+                normalized['toolCalls'] = []
+                for call in calls:
+                    if call['type'] != 'function':
+                        raise ValueError('provider tool call must be a function')
+                    function = call['function']
+                    arguments = function['arguments']
+                    if not isinstance(arguments, str):
+                        raise ValueError('provider function arguments must be JSON text')
+                    normalized['toolCalls'].append({
+                        'id': call['id'], 'name': function['name'],
+                        'arguments': json.loads(arguments)})
             if 'model' in result:
                 normalized['modelVersion'] = result['model']
+            validate_native_response(normalized)
             return normalized
         except (KeyError, IndexError, TypeError, ValueError) as exc:
             raise ProviderFailure('invalid provider response: ' + redact(str(exc), secrets)) from None

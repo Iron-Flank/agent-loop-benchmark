@@ -34,7 +34,7 @@ def inputs(count=2):
             'totalTokens': 100, 'tierTokens': {
                 'stable': 20, 'semi-stable': 30, 'unstable': 45},
             'requestOverheadTokens': 5, 'latencyMs': 10 + i,
-            'segments': [{'tier': 'unstable', 'content': 'evidence'}],
+            'tierSegments': [{'tier': 'unstable', 'content': 'evidence'}],
         }
         requests.append(request)
         probes.append({'probeId': pid, 'eligibleForAccuracy': True,
@@ -113,7 +113,7 @@ class ReportMetricsTests(unittest.TestCase):
                           'status': 'error', 'category': 'budget', 'totalTokens': 300,
                           'tierTokens': {'stable': 50, 'semi-stable': 100, 'unstable': 140},
                           'requestOverheadTokens': 10, 'latencyMs': 100,
-                          'segments': []})
+                          'tierSegments': []})
         report = build_report(*values)
         tokens = report['tokenEfficiency']
         self.assertAlmostEqual(tokens['assembledContextTokens']['mean'], 500 / 3)
@@ -127,8 +127,8 @@ class ReportMetricsTests(unittest.TestCase):
     def test_provenance_normalizes_turns_and_deduplicates_facts(self):
         values = inputs(2)
         values[0]['probes'][0]['expected']['requiredFactIds'] = ['f1', 'f3']
-        values[3][0]['segments'][0]['sourceIds'] = ['t1', 'f1', 'unknown']
-        values[3][1]['segments'][0]['sourceIds'] = []
+        values[3][0]['tierSegments'][0]['sourceIds'] = ['t1', 'f1', 'unknown']
+        values[3][1]['tierSegments'][0]['sourceIds'] = []
         report = build_report(*values)['contextRelevance']
         self.assertEqual(report['status'], 'reported')
         self.assertEqual(report['reportedCount'], 2)
@@ -142,7 +142,7 @@ class ReportMetricsTests(unittest.TestCase):
         values = inputs(1)
         values[0]['sessions'][1]['turns'].append({
             'turnId': 'reference-turn', 'introducedFactIds': [], 'referencedFactIds': ['f1']})
-        values[3][0]['segments'][0]['sourceIds'] = ['reference-turn']
+        values[3][0]['tierSegments'][0]['sourceIds'] = ['reference-turn']
         report = build_report(*values)
         self.assertEqual(report['contextRelevance']['precision'], 1)
         self.assertEqual(report['contextRelevance']['recall'], 1)
@@ -151,7 +151,7 @@ class ReportMetricsTests(unittest.TestCase):
     def test_fact_ledger_supplies_provenance_without_turn_annotations(self):
         values = inputs(1)
         values[0]['sessions'][0]['turns'][0].pop('introducedFactIds')
-        values[3][0]['segments'][0]['sourceIds'] = ['t1']
+        values[3][0]['tierSegments'][0]['sourceIds'] = ['t1']
         report = build_report(*values)
         self.assertEqual(report['contextRelevance']['precision'], 0.5)
         self.assertEqual(report['contextRelevance']['recall'], 1)
@@ -161,7 +161,7 @@ class ReportMetricsTests(unittest.TestCase):
         values = inputs(1)
         values[0]['sessions'][1]['turns'].append({
             'turnId': 'unrelated-turn', 'introducedFactIds': [], 'referencedFactIds': []})
-        values[3][0]['segments'][0]['sourceIds'] = ['f1', 'unrelated-turn']
+        values[3][0]['tierSegments'][0]['sourceIds'] = ['f1', 'unrelated-turn']
         relevance = build_report(*values)['contextRelevance']
         self.assertEqual(relevance['precision'], 0.5)
         self.assertEqual(relevance['recall'], 1)
@@ -173,7 +173,7 @@ class ReportMetricsTests(unittest.TestCase):
         self.assertEqual(report['notReportedCount'], 2)
         self.assertIsNone(report['precision'])
         self.assertIsNone(report['recall'])
-        values[3][0]['segments'][0]['sourceIds'] = ['f1']
+        values[3][0]['tierSegments'][0]['sourceIds'] = ['f1']
         report = build_report(*values)['contextRelevance']
         self.assertEqual(report['status'], 'partial')
         self.assertEqual((report['reportedCount'], report['notReportedCount']), (1, 1))
@@ -185,7 +185,7 @@ class ReportMetricsTests(unittest.TestCase):
     def test_empty_gold_relevance_is_undefined_not_perfect(self):
         values = inputs(1)
         values[0]['probes'][0]['expected']['requiredFactIds'] = []
-        values[3][0]['segments'][0]['sourceIds'] = []
+        values[3][0]['tierSegments'][0]['sourceIds'] = []
         result = build_report(*values)['contextRelevance']['perProbe'][0]
         self.assertIsNone(result['recall'])
         self.assertIsNone(result['precision'])
