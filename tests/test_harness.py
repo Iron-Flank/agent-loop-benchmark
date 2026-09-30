@@ -4,8 +4,9 @@ from pathlib import Path
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 
-from almm_fixture.engine import generate
+from almm_fixture.engine import EVALUATION_SEED_START, adapter_view, generate
 from almm_harness.budget import BudgetVerifier
 from almm_harness.errors import AdapterFailure, ProviderFailure
 from almm_harness.proxy import ModelProxy
@@ -72,6 +73,168 @@ def records(directory, name):
 
 
 class HarnessTests(unittest.TestCase):
+    def test_adapter_file_preflight_rejects_gold_before_initialization_or_artifacts(self):
+        fixture = generate(42, 10)
+        for field in ('expected', 'acceptedAnswers', 'requiredFactIds', 'forbiddenFactIds',
+                      'goldEvidenceIds', 'matchType', 'facts', 'introducedFactIds'):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                view = adapter_view(fixture)
+                view['probes'][0][field] = {'nested': fixture['probes'][0]['expected']}
+                adapter_path = root / 'adapter.json'
+                adapter_path.write_text(json.dumps(view))
+                artifacts = root / 'runs'
+                runner, adapter, proxy = make_runner(artifacts)
+                with patch.object(adapter, 'initialize') as initialize:
+                    with self.assertRaises(ValueError):
+                        runner.run(fixture, adapter_input_path=adapter_path)
+                initialize.assert_not_called()
+                self.assertEqual(proxy.telemetry, [])
+                self.assertFalse(artifacts.exists())
+
+    def test_adapter_file_must_match_fixture_and_reject_unknown_nested_fields(self):
+        fixture = generate(42, 10)
+        candidates = [adapter_view(generate(43, 10)), adapter_view(fixture)]
+        candidates[1]['sessions'][0]['turns'][0]['metadata'] = {'matchType': 'exact'}
+        for view in candidates:
+            with self.subTest(view=view), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                adapter_path = root / 'adapter.json'
+                adapter_path.write_text(json.dumps(view))
+                runner, adapter, _ = make_runner(root / 'runs')
+                with patch.object(adapter, 'initialize') as initialize:
+                    with self.assertRaises(ValueError):
+                        runner.run(fixture, adapter_input_path=adapter_path)
+                initialize.assert_not_called()
+                self.assertFalse((root / 'runs').exists())
+
+    def test_duplicate_adapter_keys_cannot_hide_gold_and_folders_are_rejected(self):
+        fixture = generate(42, 10)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            adapter_path = root / 'adapter.json'
+            clean = json.dumps(adapter_view(fixture))
+            adapter_path.write_text('{"probes":[{"expected":{}}],' + clean[1:])
+            for path in (adapter_path, root):
+                runner, adapter, _ = make_runner(root / 'runs')
+                with patch.object(adapter, 'initialize') as initialize:
+                    with self.assertRaises(ValueError):
+                        runner.run(fixture, adapter_input_path=path)
+                initialize.assert_not_called()
+                self.assertFalse((root / 'runs').exists())
+
+    def test_private_held_out_split_runs_without_scorer_fields_reaching_adapter(self):
+        fixture = generate(EVALUATION_SEED_START, 10, held_out=True)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            root.chmod(0o700)
+            scorer_path = root / 'scorer.json'
+            scorer_path.write_text(json.dumps(fixture))
+            scorer_path.chmod(0o600)
+            adapter_path = root / 'adapter.json'
+            adapter_path.write_text(json.dumps(adapter_view(fixture)))
+            adapter_path.chmod(0o600)
+            runner, adapter, _ = make_runner(root / 'runs')
+            result = runner.run(fixture, adapter_input_path=adapter_path)
+            self.assertTrue(result['results']['valid'])
+            self.assertEqual(result['results']['answeredCount'], 5)
+            self.assertEqual(adapter.probe_counts, [100] * 5)
+
+    def test_held_out_scorer_records_in_adapter_file_are_not_publishable(self):
+        fixture = generate(EVALUATION_SEED_START, 10, held_out=True)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            root.chmod(0o700)
+            for name in ('scorer.json', 'adapter.json'):
+                path = root / name
+                path.write_text(json.dumps(fixture))
+                path.chmod(0o600)
+            runner, adapter, proxy = make_runner(root / 'runs')
+            with patch.object(adapter, 'initialize') as initialize:
+                with self.assertRaisesRegex(ValueError, 'scorer-only'):
+                    runner.run(fixture, adapter_input_path=root / 'adapter.json')
+            initialize.assert_not_called()
+            self.assertEqual(proxy.telemetry, [])
+            self.assertFalse((root / 'runs').exists())
+
+    def test_held_out_split_must_match_scorer_fixture_and_private_parent(self):
+        fixture = generate(EVALUATION_SEED_START, 10, held_out=True)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            root.chmod(0o700)
+            adapter_path = root / 'adapter.json'
+            adapter_path.write_text(json.dumps(adapter_view(fixture)))
+            adapter_path.chmod(0o600)
+            scorer_path = root / 'scorer.json'
+            scorer_path.write_text(json.dumps(
+                generate(EVALUATION_SEED_START + 1, 10, held_out=True)))
+            scorer_path.chmod(0o600)
+            runner, adapter, _ = make_runner(root / 'runs')
+            with patch.object(adapter, 'initialize') as initialize:
+                with self.assertRaisesRegex(ValueError, 'scorer file does not match'):
+                    runner.run(fixture, adapter_input_path=adapter_path)
+                root.chmod(0o755)
+                with self.assertRaisesRegex(ValueError, 'private permissions'):
+                    runner.run(fixture, adapter_input_path=adapter_path)
+            initialize.assert_not_called()
+            self.assertFalse((root / 'runs').exists())
+
+    def test_held_out_scorer_permissions_and_symlink_targets_are_checked(self):
+        fixture = generate(EVALUATION_SEED_START, 10, held_out=True)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            root.chmod(0o700)
+            adapter_path = root / 'adapter.json'
+            adapter_path.write_text(json.dumps(adapter_view(fixture)))
+            adapter_path.chmod(0o600)
+            scorer_path = root / 'scorer.json'
+            scorer_path.write_text(json.dumps(fixture))
+            scorer_path.chmod(0o644)
+            runner, adapter, _ = make_runner(root / 'runs')
+            with patch.object(adapter, 'initialize') as initialize:
+                with self.assertRaisesRegex(ValueError, 'private permissions'):
+                    runner.run(fixture, adapter_input_path=adapter_path)
+            initialize.assert_not_called()
+            scorer_path.unlink()
+            scorer_path.symlink_to(Path(__file__).resolve())
+            with self.assertRaisesRegex(ValueError, 'outside the public repository'):
+                runner.run(fixture, adapter_input_path=adapter_path)
+            self.assertFalse((root / 'runs').exists())
+
+    def test_run_log_preserves_session_turn_probe_failure_diagnostics_without_secrets(self):
+        key = 'private-log-provider-key'
+        def provider(payload):
+            request_id = payload['request']['requestId']
+            if request_id.endswith(':101'):
+                raise RuntimeError(
+                    f'provider refused request; Authorization: Basic basic-private-value; '
+                    f'x-api-key=header-private-value; environment={key}')
+            return {'answer': 'ok'}
+        provider.api_key_env = 'CUSTOM_PROVIDER_AUTH'
+        with tempfile.TemporaryDirectory() as directory, patch.dict(
+                'os.environ', {'CUSTOM_PROVIDER_AUTH': key}):
+            runner, _, _ = make_runner(directory, provider=provider)
+            result = runner.run(generate(42, 10))
+            events = records(result['artifactDir'], 'events.jsonl')
+            self.assertEqual([event['sessionId'] for event in events
+                              if event['type'] == 'session_started'],
+                             [f's-{index:04d}' for index in range(1, 11)])
+            self.assertEqual([event['sessionId'] for event in events
+                              if event['type'] == 'session_completed'],
+                             [f's-{index:04d}' for index in range(1, 11)])
+            self.assertEqual([event['turnId'] for event in events if event['type'] == 'turn'],
+                             [f't-{session:04d}-{turn:02d}' for session in range(1, 11)
+                              for turn in range(1, 11)])
+            failed = next(event for event in events
+                          if event['type'] == 'probe' and event['status'] == 'error')
+            self.assertEqual(failed['category'], 'provider')
+            self.assertEqual(failed['requestIds'], ['harness-test:101'])
+            self.assertIn('provider refused request', failed['error'])
+            for name in ('events.jsonl', 'probes.jsonl', 'requests.jsonl', 'dead-letters.jsonl'):
+                contents = (Path(result['artifactDir']) / name).read_text()
+                for secret in (key, 'basic-private-value', 'header-private-value'):
+                    self.assertNotIn(secret, contents)
+
     def test_generated_fixture_runs_chronologically_and_preserves_raw_artifacts(self):
         fixture = generate(42, 10)
         with tempfile.TemporaryDirectory() as directory:

@@ -12,10 +12,11 @@ import threading
 import time
 
 from almm_adapter.contract import validate_manifest, validate_response
-from almm_fixture.engine import adapter_view, canonical_json
+from almm_fixture.engine import canonical_json
 from almm_fixture.validation import SchemaValidator
 
 from .errors import AdapterFailure, HarnessFailure, TimeoutFailure
+from .isolation import validate_adapter_input
 
 
 # Keep strong references: timed-out work must never share state with another run.
@@ -257,13 +258,14 @@ class FixtureRunner:
         except Exception as error:
             raise _failure(error) from error
 
-    def run(self, fixture, resume=False):
+    def run(self, fixture, resume=False, adapter_input_path=None):
         if any(self.adapter is adapter or self.proxy is proxy for adapter, proxy in _TIMED_OUT):
             raise AdapterFailure('timed-out adapter/proxy cannot be reused; create fresh instances')
         SchemaValidator.validate(fixture)
         fixture_hash = _hash({key: value for key, value in fixture.items() if key != 'contentHash'})
         if 'contentHash' in fixture and fixture['contentHash'] != fixture_hash:
             raise ValueError('fixture contentHash does not match fixture content')
+        view = validate_adapter_input(fixture, adapter_input_path)
         configuration = {key: deepcopy(self.manifest[key]) for key in (
             'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix', 'seed', 'scorerVersion', 'concurrency')}
         configuration.update(harnessHash=_harness_hash(), fixtureHash=fixture_hash,
@@ -285,7 +287,6 @@ class FixtureRunner:
                 if previous.get('runId') == self.manifest['runId']:
                     raise ValueError('checkpoint run identity does not match fixture/configuration')
         self.directory.mkdir(exist_ok=True)
-        view = adapter_view(fixture)
         checkpoint = self._read_checkpoint(len(view['sessions'])) if resume else None
         if not resume and any((self.directory / name).exists() for name in _STREAMS):
             raise FileExistsError('interrupted artifacts exist; use resume=True or a new runId')
@@ -354,6 +355,9 @@ class FixtureRunner:
                     self._checkpoint(0)
             terminated = False
             for index, session in enumerate(view['sessions'][completed:], completed + 1):
+                self._append('events.jsonl', {'type': 'session_started',
+                                             'sessionId': session['sessionId'],
+                                             'timestamp': _timestamp(), 'sessionIndex': index})
                 for turn in session['turns']:
                     error = self._execute('turn', dict(turn, sessionId=session['sessionId']),
                                           session['sessionId'])
@@ -366,6 +370,10 @@ class FixtureRunner:
                         if error is not None and error.category == 'timeout':
                             terminated = True
                             break
+                self._append('events.jsonl', {
+                    'type': 'session_terminated' if terminated else 'session_completed',
+                    'sessionId': session['sessionId'], 'sessionIndex': index,
+                    'timestamp': _timestamp()})
                 if terminated:
                     break
                 completed = index

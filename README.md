@@ -6,6 +6,45 @@ generator, core execution harness, versioned scoring pipeline, and immutable rep
 Participating runtimes are separate tasks. Offline smoke responses are not canonical benchmark
 answers or a claim of model accuracy.
 
+## Clone-and-run CI smoke
+
+From a fresh clone, with Python 3.11+ and `make` installed:
+
+```sh
+make smoke
+```
+
+This single command creates `.venv`, installs the package and its dependencies,
+and runs `python -m almm_harness --smoke`. No API key, environment configuration,
+cloud service, or model download is required. Package installation may require
+network access to obtain the build dependencies.
+
+The smoke pipeline generates a 10-session fixture (100 accumulated turns),
+executes the reference adapter through a mock model proxy, scores all five probes,
+and writes an immutable report. It checks request/answer accounting and the
+expected abstention result; any pipeline or accounting failure exits nonzero.
+The pipeline enforces a wall time below 120 seconds, excluding dependency
+installation. Mock models, character-count tokenization, and synthetic calibration
+are explicitly **noncanonical** and cannot establish benchmark quality.
+
+Each invocation retains a new archive under `artifacts/smoke/`, with a JSON
+summary identifying the fixture, run, score, and report paths. Inspect the run's
+`events.jsonl`, `requests.jsonl`, `probes.jsonl`, and `dead-letters.jsonl` for
+diagnostics. To choose another output root after installation:
+
+```sh
+.venv/bin/python -m almm_harness --smoke --output /tmp/almm-smoke
+# Installed entry point: .venv/bin/almm-harness --smoke
+```
+
+[`Benchmark smoke`](.github/workflows/smoke.yml) runs the same command on every
+push and pull request, with read-only repository permissions and no secrets.
+It retains smoke artifacts even on failure. CI never triggers a full-scale run;
+full benchmark runs are manual, using the manifest-driven harness and scoring
+APIs documented below. Only provider API keys belong in environment variables;
+model, decoding, seed, rate limit, timeout, and tokenizer settings belong in the
+run manifest, not environment variables.
+
 ## Frozen scorer calibration content
 
 [`calibration/scorer-v1.0.0`](calibration/scorer-v1.0.0) contains the BCH-014
@@ -433,9 +472,30 @@ send turns as their allowlisted turn objects and probes as
 Filesystem permissions are not an adapter sandbox: run untrusted adapters
 without access to the private scorer directory.
 
+When consuming a split fixture, load `scorer.json` only in the trusted harness
+and scorer process and pass the adapter-facing file explicitly:
+
+```python
+fixture = json.loads(Path("/private/almm-evaluation/v1.0.0-run/scorer.json").read_text())
+result = runner.run(
+    fixture,
+    adapter_input_path="/private/almm-evaluation/v1.0.0-run/adapter.json",
+)
+```
+
+Preflight inspects the actual JSON file before initializing the adapter or
+creating run artifacts. It rejects expected answers, match types, gold evidence
+IDs, unknown fields, duplicate JSON keys, and any mismatch with the fixture's
+allowlisted projection. Rejected runs have no finalized manifest and cannot be
+scored or published. The file contract is a single JSON file, not a directory.
+For held-out fixtures, its sibling `scorer.json` must match the trusted fixture;
+both resolved files and their parent must remain outside the public checkout
+with private 0600/0700 permissions. In-memory `run(fixture)` validates the same
+clean projection but cannot verify an on-disk scorer file's location.
+
 ## Core harness
 
-`FixtureRunner(manifest, adapter, proxy, artifact_dir).run(fixture, resume=False)`
+`FixtureRunner(manifest, adapter, proxy, artifact_dir).run(fixture, resume=False, adapter_input_path=None)`
 executes validated fixtures sequentially, inserting probes after their declared
 sessions. It initializes a clean adapter for each fixture/run pair and passes
 only allowlisted turns and probe questions. Scoring remains a separate pipeline;
@@ -501,6 +561,13 @@ generator/scorer version, stable-prefix hash, and every request's tier totals.
 Probe records retain raw answers, request telemetry, latency and optional source
 IDs. Dead letters preserve redacted request context, errors and retry history;
 they are not re-scored. Final artifacts cannot be overwritten: use a new run ID.
+
+`events.jsonl` is the structured run log: run and session start/completion,
+chronological turn/probe outcomes, request IDs, timestamps, latency, and failure
+category/message. Correlate request IDs with `requests.jsonl` and
+`dead-letters.jsonl` to diagnose failures without rerunning. All log records
+redact Authorization values and API keys, including credentials embedded in
+error strings.
 
 Atomic `checkpoint.json` records the last fully completed session and stream byte
 offsets. After interruption, a fresh runner/adapter with the same manifest and

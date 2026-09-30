@@ -14,9 +14,16 @@ from .errors import AdapterFailure, HarnessFailure, ProviderFailure, TimeoutFail
 
 MAX_RETRIES = 3
 MAX_WAIT_SECONDS = 30
-_SECRET_FIELDS = {'apikey', 'xapikey', 'authorization', 'accesstoken', 'refreshtoken',
-                  'password', 'secret', 'clientsecret', 'credential', 'credentials',
-                  'key', 'token', 'auth', 'privatekey', 'secretkey', 'apisecret'}
+_SECRET_FIELDS = {'apikey', 'xapikey', 'authorization', 'proxyauthorization',
+                  'accesstoken', 'refreshtoken', 'password', 'secret', 'clientsecret',
+                  'credential', 'credentials', 'key', 'token', 'auth', 'privatekey',
+                  'secretkey', 'apisecret'}
+_AUTH_HEADER = re.compile(
+    r'''(?i)(\b(?:proxy[-_ ]?)?authorization["']?\s*[:=]\s*)'''
+    r'''(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\r\n,;]+)''')
+_API_KEY_FIELD = re.compile(
+    r'''(?i)(\b(?:x[-_ ]?)?api[-_ ]?key["']?\s*[:=]\s*)'''
+    r'''(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;"']+)''')
 
 
 def _secret_field(name):
@@ -36,10 +43,14 @@ def redact(value, secrets=None):
         return {str(key): '[REDACTED]' if _secret_field(key) else redact(item, secrets)
                 for key, item in value.items()}
     if isinstance(value, (list, tuple)):
+        if len(value) == 2 and isinstance(value[0], str) and _secret_field(value[0]):
+            return [value[0], '[REDACTED]']
         return [redact(item, secrets) for item in value]
     if isinstance(value, str):
         for secret in secrets:
             value = value.replace(secret, '[REDACTED]')
+        value = _AUTH_HEADER.sub(lambda match: match[1] + '[REDACTED]', value)
+        value = _API_KEY_FIELD.sub(lambda match: match[1] + '[REDACTED]', value)
         return re.sub(r'(?i)\bBearer\s+[^\s,;"\']+', 'Bearer [REDACTED]', value)
     if value is None or isinstance(value, (int, float, bool)):
         return value

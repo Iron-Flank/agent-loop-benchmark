@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 from almm_harness.budget import BudgetVerifier
 
 from almm_harness.errors import AdapterFailure, BudgetFailure, ProviderFailure, TimeoutFailure
-from almm_harness.proxy import ModelProxy, OpenAICompatibleProvider, ProviderHTTPError
+from almm_harness.proxy import ModelProxy, OpenAICompatibleProvider, ProviderHTTPError, redact
 
 
 def manifest(rate=60):
@@ -43,6 +43,44 @@ class FakeClock:
 
 
 class ProxyTests(unittest.TestCase):
+    def test_redaction_masks_header_values_in_objects_pairs_and_error_strings(self):
+        value = {'headers': {'Authorization': 'Basic private-basic',
+                             'X-API-Key': 'private-api-key'},
+                 'pairs': [['Proxy-Authorization', 'Digest private-digest']],
+                 'error': 'denied; Authorization: Basic private-basic; '
+                          'api_key="private-api-key"; requestId=r-17',
+                 'requestId': 'r-17', 'category': 'provider'}
+        original = copy.deepcopy(value)
+        masked = redact(value, [])
+        self.assertEqual(masked['headers']['Authorization'], '[REDACTED]')
+        self.assertEqual(masked['pairs'][0][1], '[REDACTED]')
+        self.assertEqual(masked['requestId'], 'r-17')
+        self.assertEqual(masked['category'], 'provider')
+        self.assertIn('denied', masked['error'])
+        self.assertIn('requestId=r-17', masked['error'])
+        for secret in ('private-basic', 'private-api-key', 'private-digest'):
+            self.assertNotIn(secret, json.dumps(masked))
+        self.assertEqual(value, original)
+
+    def test_custom_provider_key_environment_is_redacted_in_errors(self):
+        key = 'custom-provider-credential'
+        class Provider:
+            api_key_env = 'CUSTOM_PROVIDER_AUTH'
+
+            def __call__(self, payload):
+                raise RuntimeError('denied with ' + key)
+
+        with patch.dict('os.environ', {'CUSTOM_PROVIDER_AUTH': key}):
+            proxy, _ = self.proxy(Provider())
+            with self.assertRaises(ProviderFailure) as raised:
+                proxy(request())
+            self.assertNotIn(key, str(raised.exception))
+            self.assertNotIn(key, json.dumps(proxy.telemetry))
+            self.assertNotIn(key, json.dumps(proxy.dead_letters))
+            self.assertEqual(proxy.telemetry[0]['requestId'], 'r1')
+            self.assertEqual(proxy.telemetry[0]['category'], 'provider')
+            self.assertIn('denied', proxy.telemetry[0]['error']['message'])
+
     def proxy(self, provider, rate=60):
         clock = FakeClock()
         proxy = ModelProxy(manifest(rate), BudgetVerifier(manifest(rate), len), provider,
