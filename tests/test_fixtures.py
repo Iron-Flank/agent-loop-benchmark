@@ -50,7 +50,7 @@ class FixtureTests(unittest.TestCase):
                 self.assertGreater(distance, 0)
                 distances.add(distance)
         self.assertTrue({10, 100, 500, 999} <= distances)
-        self.assertNotIn(1000, distances)  # mathematical bound, not a passed ac-2 claim
+        self.assertNotIn(1000, distances)
 
     def test_determinism_and_hash(self):
         first = generate(42, 10)
