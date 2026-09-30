@@ -1,20 +1,19 @@
 # agent-loop-benchmark
 
 ALMM measures runtime memory quality as conversation histories accumulate.
-This checkout supplies the **RuntimeAdapter 1.0 contract** and a deterministic
-fixture generator. The full benchmark harness, scoring, and participating
-runtimes are separate tasks. The offline adapter smoke command below exercises
-the adapter lifecycle, not a scored benchmark or a claim of model accuracy.
+This checkout supplies the **RuntimeAdapter 1.0 contract**, deterministic fixture
+generator, and core execution harness. Scoring and participating runtimes are
+separate tasks. Offline smoke responses are not scored benchmark answers or a
+claim of model accuracy.
 
 ## Quick start
 
-Python 3.11 or later; no runtime dependencies outside the standard library.
+Python 3.11 or later. Adapter smoke and fixture generation use only the standard library.
 From the checkout:
 
 ```sh
 python3 -m almm_adapter --smoke
 python3 -m almm_adapter conformance
-python3 -m unittest discover -s tests -v
 ```
 
 Smoke runs ten sequential sessions and twenty model requests using a deterministic
@@ -34,8 +33,8 @@ almm-adapter conformance
 For development checks in the activated environment:
 
 ```sh
-python3 -m pip install -e '.[dev]'
-ruff check almm_fixture almm_adapter tests templates/runtime-adapter
+python3 -m pip install -e '.[dev,model]'
+ruff check almm_fixture almm_adapter almm_harness tests templates/runtime-adapter
 coverage run -m unittest discover -s tests -v
 coverage run -m almm_adapter conformance
 coverage run -m almm_adapter --smoke
@@ -66,7 +65,7 @@ Outputs are immutable: choose a new path rather than overwriting an old fixture.
 All randomness comes from the seed. JSON uses sorted keys, compact separators,
 UTF-8, and a trailing newline. `contentHash` is SHA-256 of that serialization
 with the `contentHash` field omitted. The fixture records `generatorVersion`;
-the future harness must copy it into its run manifest. Output-changing updates
+the harness copies it into its run manifest. Output-changing updates
 require a new generator version and additive fixture directories.
 
 `FactGraph` retains active, superseded, and expired facts. `invalidatedAt`
@@ -116,6 +115,93 @@ send turns as their allowlisted turn objects and probes as
 Filesystem permissions are not an adapter sandbox: run untrusted adapters
 without access to the private scorer directory.
 
+## Core harness
+
+`FixtureRunner(manifest, adapter, proxy, artifact_dir).run(fixture, resume=False)`
+executes validated fixtures sequentially, inserting probes after their declared
+sessions. It initializes a clean adapter for each fixture/run pair and passes
+only allowlisted turns and probe questions. Scoring remains a separate pipeline;
+`eligibleForAccuracy` identifies answered probes, not correct answers.
+
+Install `.[dev,model]` for the pinned tiktoken loader and tokenizer tests. This
+offline example exercises the generated ten-session fixture without an API key:
+
+```sh
+python3 - <<'PY'
+from importlib.metadata import version
+from tempfile import TemporaryDirectory
+from almm_adapter.reference import ReferenceAdapter
+from almm_fixture.engine import generate
+from almm_harness.budget import BudgetVerifier
+from almm_harness.proxy import ModelProxy
+from almm_harness.runner import FixtureRunner
+from almm_harness.tokenizers import load_tokenizer
+
+manifest = {
+    'runId': 'offline-example',
+    'adapter': {'name': 'reference', 'revision': '1.0.0', 'contractVersion': '1.0'},
+    'model': {'provider': 'offline', 'name': 'smoke', 'version': '1',
+              'decoding': {'temperature': 0}, 'seed': 42},
+    'tokenizer': {'name': 'tiktoken:cl100k_base', 'version': version('tiktoken')},
+    'stablePrefix': ['Benchmark contract.', 'SOUL.', 'Agent.', 'User.'],
+    'seed': 42, 'scorerVersion': 'unscored', 'rateLimitRpm': 1000000,
+    'probeTimeoutSeconds': 10,
+}
+count = load_tokenizer(manifest['tokenizer'])
+proxy = ModelProxy(manifest, BudgetVerifier(manifest, count),
+                   lambda payload: {'answer': 'Offline smoke answer'})
+with TemporaryDirectory() as directory:
+    adapter = ReferenceAdapter(proxy, count)
+    result = FixtureRunner(manifest, adapter, proxy, directory).run(generate(42, 10))
+    assert result['results']['answeredCount'] == 5
+    print(result['results'])
+PY
+```
+
+For real calls, inject `OpenAICompatibleProvider(endpoint=..., api_key_env=...)`.
+Credentials come only from the named environment variable. The transport sends
+`model.version` as the wire model, the pinned decoding settings and optional
+model seed, with exactly concatenated segment content in one user message.
+Declare `tokenizer.requestOverheadTokens` for that provider's chat framing.
+The budget verifier retokenizes the complete wire content plus this overhead;
+adapter counts cannot bypass the 25,000-token ceiling. Segment and per-tier
+counts are recorded independently, without per-tier quotas. The immutable stable
+prefix must lead every request; its content hash is recorded.
+
+Each proxy has an independent, thread-safe token bucket (default 60 requests/min,
+initial burst equal to bucket capacity). Only 429/503 errors retry: three retries
+with 1/2/4-second backoff, at most 30 seconds of retry backoff and quota waiting.
+Initial throttling is not capped by the retry wait limit. Identical scored
+requests always reach the provider. Provider token usage and version are recorded
+when supplied; version drift is rejected.
+
+Artifacts live under a run-ID/configuration-hash directory: immutable
+`manifest.json`, `requests.jsonl`, `probes.jsonl`, `events.jsonl`, and
+`dead-letters.jsonl`. The manifest includes actual fixture/harness hashes,
+adapter/runtime revision, pinned model/tokenizer/decoding, seeds, timestamp,
+generator/scorer version, stable-prefix hash, and every request's tier totals.
+Probe records retain raw answers, request telemetry, latency and optional source
+IDs. Dead letters preserve redacted request context, errors and retry history;
+they are not re-scored. Final artifacts cannot be overwritten: use a new run ID.
+
+Atomic `checkpoint.json` records the last fully completed session and stream byte
+offsets. After interruption, a fresh runner/adapter with the same manifest and
+fixture calls `run(fixture, resume=True)`. Partial-session records are truncated;
+completed sessions reconstruct adapter memory from verified archived answers,
+without new provider calls or scoring. Execution then starts at the next
+session. This recovery-only transcript replay is not response caching during
+scored execution. Invalid checkpoints or unverifiable reconstruction restart
+at session 1; configuration/fixture mismatch rejects resume.
+
+Budget, provider, adapter and timeout failures are reported separately and never
+count as incorrect answers. Accuracy denominators include answered probes only.
+More than 5% provider/adapter/timeout failures flags investigation without
+invalidating the run; budget failures remain a separate operational metric.
+Hard probe timeout terminates the fixture and forbids reuse of its adapter/proxy,
+because Python cannot safely kill arbitrary adapter threads. Create fresh
+instances and a new run ID after timeout; unattempted probes are reported
+separately. Only trusted adapters may run in-process.
+
 ## Contract and reference adapter
 
 [`almm_adapter/contract.py`](almm_adapter/contract.py) defines JSON-compatible
@@ -130,8 +216,8 @@ types and validators. The four required methods are:
 
 The manifest declares `adapter: {name, revision, contractVersion: "1.0"}` and
 includes `runId`, `model`, `tokenizer`, and `stablePrefix: list[str]`.
-Model and tokenizer objects carry the harness's pinned configurations; this
-adapter scaffold does not define the complete future harness manifest schema.
+Model and tokenizer objects carry the harness's pinned configurations; the core
+harness also requires a seed and scorer version.
 Missing and incompatible contract versions are rejected before run initialization.
 [`sample_manifest()`](almm_adapter/conformance.py) supplies offline examples.
 
