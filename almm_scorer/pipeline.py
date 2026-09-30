@@ -12,7 +12,7 @@ from almm_adapter.contract import validate_manifest
 from almm_fixture.engine import canonical_json
 from almm_fixture.validation import SchemaValidator
 from almm_harness.budget import BudgetVerifier
-from almm_harness.errors import HarnessFailure
+from almm_harness.errors import BudgetFailure, HarnessFailure
 from almm_harness.proxy import redact
 from almm_harness.tokenizers import load_tokenizer
 
@@ -79,6 +79,9 @@ def preflight(fixture, source):
     configuration = {key: manifest[key] for key in (
         'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix', 'seed', 'scorerVersion',
         'harnessHash', 'fixtureHash', 'rateLimitRpm', 'probeTimeoutSeconds')}
+    # Retain support for immutable archives created before concurrency metadata.
+    if 'concurrency' in manifest:
+        configuration['concurrency'] = manifest['concurrency']
     if digest(configuration) != manifest['configHash'] or digest(manifest['stablePrefix']) != manifest['stablePrefixHash']:
         raise ValueError('manifest configuration hash mismatch')
     verifier = BudgetVerifier(manifest, load_tokenizer(manifest['tokenizer']))
@@ -87,6 +90,11 @@ def preflight(fixture, source):
     for request in _rows(source / 'requests.jsonl'):
         try:
             normalized = verifier.verify(request)
+        except BudgetFailure as error:
+            # An honestly rejected request is execution telemetry, not invalid gold.
+            if request.get('status') != 'error' or request.get('category') != 'budget':
+                raise ValueError(f'over-budget request was not rejected: {request.get("requestId")}') from error
+            normalized = error.request
         except (HarnessFailure, ValueError) as error:
             raise ValueError(f'request budget/telemetry validation failed: {error}') from error
         rid = request['requestId']

@@ -17,13 +17,14 @@ model = ["tiktoken>=0.9"]
 almm-adapter = "almm_adapter.__main__:main"
 almm-fixture = "almm_fixture.__main__:main"
 almm-scorer = "almm_scorer.__main__:main"
+almm-report = "almm_report.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["almm_adapter*", "almm_fixture*", "almm_harness*", "almm_scorer*"]
+include = ["almm_adapter*", "almm_fixture*", "almm_harness*", "almm_scorer*", "almm_report*"]
 
 
 [tool.coverage.run]
-source = ["almm_adapter", "almm_fixture", "almm_harness", "almm_scorer"]
+source = ["almm_adapter", "almm_fixture", "almm_harness", "almm_scorer", "almm_report"]
 branch = true
 patch = ["subprocess"]
 sigterm = true

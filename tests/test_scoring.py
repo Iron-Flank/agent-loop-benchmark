@@ -24,6 +24,16 @@ def rewrite(path, value):
     path.write_bytes(canonical_json(value))
 
 
+class OverBudgetAdapter:
+    """Delegate turns normally but assemble an over-budget probe request."""
+    def __new__(cls, proxy):
+        from test_harness import CompactAdapter
+        class Adapter(CompactAdapter):
+            def answerProbe(self, probe):
+                return self.respond('x' * 25001, probe['probeId'], 'answer')
+        return Adapter(proxy)
+
+
 class ScoringTests(unittest.TestCase):
     def test_entire_archive_validated_before_calibration_or_judge(self):
         with tempfile.TemporaryDirectory() as root:
@@ -103,6 +113,20 @@ class ScoringTests(unittest.TestCase):
             rows = [json.loads(line) for line in (Path(result['artifactDir']) / 'scores.jsonl').read_text().splitlines()]
             self.assertTrue(all(row['normalizedResult']['judgment'] == 'incomplete' for row in rows))
             self.assertTrue(all(not row['eligibleForAccuracy'] for row in rows))
+    def test_archived_budget_failures_remain_publishable_but_not_answered(self):
+        with tempfile.TemporaryDirectory() as root:
+            fixture = generate(42, 10)
+            runner, _, _ = make_runner(root, adapter_class=OverBudgetAdapter)
+            run = runner.run(fixture)
+            validated = preflight(fixture, run['artifactDir'])
+            self.assertEqual(validated['manifest']['results']['answeredCount'], 0)
+            self.assertEqual(validated['manifest']['results']['failureCounts']['budget'], 5)
+            with patch('almm_scorer.pipeline.CalibrationGate.evaluate', return_value={'approved': True}):
+                result = ScoringPipeline().run(fixture, run['artifactDir'], Path(root) / 'scores', canonical=False)
+            rows = [json.loads(line) for line in (Path(result['artifactDir']) / 'scores.jsonl').read_text().splitlines()]
+            self.assertTrue(all(row['failureCategory'] == 'budget' for row in rows))
+            self.assertTrue(all(not row['eligibleForAccuracy'] for row in rows))
+
 
     def test_numeric_and_semantic_fixture_gold_supported(self):
         from test_fixture_validation import valid_fixture
