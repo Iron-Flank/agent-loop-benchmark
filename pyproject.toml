@@ -12,16 +12,17 @@ license = "MIT"
 
 [project.optional-dependencies]
 dev = ["coverage>=7.10", "ruff>=0.9", "build>=1.2"]
+model = ["tiktoken>=0.9"]
 [project.scripts]
 almm-adapter = "almm_adapter.__main__:main"
 almm-fixture = "almm_fixture.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["almm_adapter*", "almm_fixture*"]
+include = ["almm_adapter*", "almm_fixture*", "almm_harness*"]
 
 
 [tool.coverage.run]
-source = ["almm_adapter", "almm_fixture"]
+source = ["almm_adapter", "almm_fixture", "almm_harness"]
 branch = true
 patch = ["subprocess"]
 sigterm = true

@@ -51,3 +51,18 @@ class BudgetTests(unittest.TestCase):
             return len(text)
         BudgetVerifier(manifest(), tokenizer).verify(request(30))
         self.assertEqual(seen[-1], 'contract' + 's' * 10 + 'x' * 12)
+
+    def test_protocol_framing_counts_toward_ceiling(self):
+        configuration = manifest()
+        configuration['tokenizer']['requestOverheadTokens'] = 7
+        verifier = BudgetVerifier(configuration, len)
+        self.assertEqual(verifier.verify(request(24993))['totalTokens'], 25000)
+        with self.assertRaises(BudgetFailure):
+            verifier.verify(request(24994))
+
+    def test_full_request_boundary_tokenization_controls_ceiling(self):
+        configuration = manifest()
+        def boundary_tokenizer(text):
+            return 25001 if text.startswith('contractssss') else len(text)
+        with self.assertRaises(BudgetFailure):
+            BudgetVerifier(configuration, boundary_tokenizer).verify(request(30))
