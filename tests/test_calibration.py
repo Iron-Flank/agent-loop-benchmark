@@ -202,6 +202,23 @@ class CalibrationGateTests(unittest.TestCase):
         freeze(self.directory, probes, review)
         self.reject('frozen|hash|immutable')
 
+    def test_renaming_agent_rows_cannot_rebrand_them_as_human(self):
+        probes = json.loads((REAL_CORPUS / 'probes.json').read_text())
+        review = json.loads((REAL_CORPUS / 'review.json').read_text())
+        probes['calibrationSetId'] = review['calibrationSetId'] = 'renamed-agent-corpus'
+        probes['labelProvenance'] = {'kind': 'human', 'labelerId': 'pretend-human'}
+        review['reviewProvenance'] = {'kind': 'human', 'reviewerId': 'pretend-reviewer'}
+        probes['labelingMethod'] = 'Claimed human authorship.'
+        review['reviewMethod'] = 'Claimed human review.'
+        freeze(self.directory, probes, review)
+        labels = {row['probeId']: row['goldJudgment'] for row in probes['probes']}
+        def oracle(probe, answer):
+            return {'judgment': labels[probe['probeId']], 'correct': False,
+                    'normalizedAnswer': answer, 'matchingMethod': probe['expected']['matchType'],
+                    'judgeOutput': None}
+        error = self.reject('human', score=oracle)
+        self.assertEqual(error.report['labelProvenance']['kind'], 'agent')
+
     def test_schema_stratification_and_review_coverage_are_enforced(self):
         cases = (
             ('duplicate', lambda p, r: p['probes'][1].update(probeId=p['probes'][0]['probeId'])),
