@@ -23,7 +23,7 @@ The project is **MIT licensed**. See [LICENSE](./LICENSE).
 
 1. **Push to a branch**: Create a feature branch from `main`, push it to the remote, and open a PR against `main`.
 2. **Enable auto-merge**: Enable auto-merge on the PR so it merges to `main` automatically once any checks pass. No manual merge step is required.
-3. **CI checks**: CI checks are not configured yet but may be added in the future. When they are, auto-merge will gate on them automatically — no workflow change needed.
+3. **CI checks**: The `Benchmark smoke` GitHub Actions workflow runs `make smoke` on every push and PR. Full benchmark runs are not part of CI.
 
 ## Contributing
 
@@ -40,7 +40,7 @@ The project is **MIT licensed**. See [LICENSE](./LICENSE).
 
 ## CI/CD
 
-**No CI/CD pipeline is configured yet.** There is no automated build, test, or lint pipeline on this repository. Auto-merge is enabled on PRs; when CI checks are added in the future, auto-merge will gate on them automatically. Until then, ensure your change builds and passes locally before opening a PR.
+The [`Benchmark smoke`](.github/workflows/smoke.yml) workflow installs dependencies and runs the credential-free ten-session fixture → harness → scorer → report pipeline through `make smoke`. It retains smoke artifacts and diagnostics. Full benchmark runs remain manual. Ensure your change builds and passes locally before opening a PR; enable auto-merge after checks pass.
 
 ## License
 

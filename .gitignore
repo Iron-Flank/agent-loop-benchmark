@@ -150,3 +150,6 @@ __pycache__/
 build/
 .coverage*
 .ruff_cache/
+
+# Local benchmark smoke archives
+artifacts/
