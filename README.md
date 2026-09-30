@@ -1,7 +1,7 @@
 # agent-loop-benchmark
 
 ALMM measures runtime memory quality as conversation histories accumulate.
-This checkout supplies the **RuntimeAdapter 1.0 contract**, deterministic fixture
+This checkout supplies the **RuntimeAdapter 2.0 contract and native model envelope 1.0**, deterministic fixture
 generator, core execution harness, versioned scoring pipeline, and immutable reports.
 Participating runtimes are separate tasks. Offline smoke responses are not canonical benchmark
 answers or a claim of model accuracy.
@@ -466,7 +466,7 @@ The new 0700 output directory contains two 0600 files:
 - `scorer.json`: complete validated fixture, including seed, version, hash,
   expected-answer records, and gold evidence.
 
-Only `adapter.json` crosses the harness input boundary. For RuntimeAdapter 1.0,
+Only `adapter.json` crosses the harness input boundary. For RuntimeAdapter 2.0,
 send turns as their allowlisted turn objects and probes as
 `{probeId, question}`; the checkpoint is harness scheduling metadata.
 Filesystem permissions are not an adapter sandbox: run untrusted adapters
@@ -517,7 +517,8 @@ from almm_harness.tokenizers import load_tokenizer
 
 manifest = {
     'runId': 'offline-example',
-    'adapter': {'name': 'reference', 'revision': '1.0.0', 'contractVersion': '1.0'},
+    'adapter': {'name': 'reference', 'revision': '2.0.0', 'contractVersion': '2.0'},
+    'nativeModelEnvelopeVersion': '1.0',
     'model': {'provider': 'offline', 'name': 'smoke', 'version': '1',
               'decoding': {'temperature': 0}, 'seed': 42},
     'tokenizer': {'name': 'tiktoken:cl100k_base', 'version': version('tiktoken')},
@@ -527,7 +528,8 @@ manifest = {
 }
 count = load_tokenizer(manifest['tokenizer'])
 proxy = ModelProxy(manifest, BudgetVerifier(manifest, count),
-                   lambda payload: {'answer': 'Offline smoke answer'})
+                   lambda payload: {'content': 'Offline smoke answer', 'finishReason': 'stop',
+                                    'usage': {'promptTokens': 0, 'completionTokens': 0}})
 with TemporaryDirectory() as directory:
     adapter = ReferenceAdapter(proxy, count)
     result = FixtureRunner(manifest, adapter, proxy, directory).run(generate(42, 10))
@@ -539,12 +541,16 @@ PY
 For real calls, inject `OpenAICompatibleProvider(endpoint=..., api_key_env=...)`.
 Credentials come only from the named environment variable. The transport sends
 `model.version` as the wire model, the pinned decoding settings and optional
-model seed, with exactly concatenated segment content in one user message.
-Declare `tokenizer.requestOverheadTokens` for that provider's chat framing.
-The budget verifier retokenizes the complete wire content plus this overhead;
-adapter counts cannot bypass the 25,000-token ceiling. Segment and per-tier
-counts are recorded independently, without per-tier quotas. The immutable stable
-prefix must lead every request; its content hash is recorded.
+model seed, preserving ordered system/user/assistant/tool messages, structured
+content, native function schemas, call arguments and linked tool results.
+`almm_adapter.native.canonical_wire` serializes the exact compact JSON body used
+by both transport and BudgetVerifier; the declared tokenizer counts this complete
+body plus `tokenizer.requestOverheadTokens` for provider protocol framing beyond
+the serialized body. Adapter counts cannot bypass the inclusive 25,000-token ceiling.
+Mapped message/schema counts are recorded independently by tier, without quotas;
+their sum need not equal full-body tokens because boundary tokenization and framing
+differ. The immutable benchmark prefix must be the first system messages on every
+request, including memory maintenance; its content hash is recorded.
 
 Each proxy has an independent, thread-safe token bucket (default 60 requests/min,
 initial burst equal to bucket capacity). Only 429/503 errors retry: three retries
@@ -572,8 +578,9 @@ error strings.
 Atomic `checkpoint.json` records the last fully completed session and stream byte
 offsets. After interruption, a fresh runner/adapter with the same manifest and
 fixture calls `run(fixture, resume=True)`. Partial-session records are truncated;
-completed sessions reconstruct adapter memory from verified archived answers,
-without new provider calls or scoring. Execution then starts at the next
+completed sessions reconstruct adapter memory from verified archived native
+requests and responses, including tool chains, finish reasons and usage, without
+new provider calls or scoring. Execution then starts at the next
 session. This recovery-only transcript replay is not response caching during
 scored execution. Invalid checkpoints or unverifiable reconstruction restart
 at session 1; configuration/fixture mismatch rejects resume.
@@ -599,20 +606,42 @@ types and validators. The four required methods are:
 | `answerProbe(probe)` | Probe ID and question only | `answer` string and `requests` list |
 | `getRequestTelemetry()` | None | Independent snapshot of all requests since initialization |
 
-The manifest declares `adapter: {name, revision, contractVersion: "1.0"}` and
-includes `runId`, `model`, `tokenizer`, and `stablePrefix: list[str]`.
-Model and tokenizer objects carry the harness's pinned configurations; the core
-harness also requires a seed and scorer version.
+The manifest declares `adapter: {name, revision, contractVersion: "2.0"}` and
+`nativeModelEnvelopeVersion: "1.0"`, and includes `runId`, `model`, `tokenizer`,
+and `stablePrefix: list[str]`. Model and tokenizer objects carry the harness's
+pinned configurations; the core harness also requires a seed and scorer version.
 Missing and incompatible contract versions are rejected before run initialization.
 [`sample_manifest()`](almm_adapter/conformance.py) supplies offline examples.
 
-Each model request is `{requestId, segments: [...]}` with unique IDs within a run.
-Segments preserve model-request order and have:
+Each `NativeModelRequest` has a run-unique `requestId`, ordered `messages`,
+optional native `tools`, `toolCalls` and `toolResults`, ordered `tierSegments`,
+and pinned `model`, `decodingSettings` and optional `seed`.
+Messages contain a native `role` and text or structured-part `content`; assistant
+messages may have `toolCalls: [{id, name, arguments}]` and null content. Tool-role
+messages link through `toolCallId`. Tools contain `name`, `description`, and
+JSON-schema `parameters`. Optional top-level calls/results corroborate uniquely
+linked history; conflicting or unattached payloads are rejected, not appended or
+silently discarded.
+
+Tier segments have:
 
 - `tier`: `stable`, `semi-stable`, or `unstable`.
-- `content`: the complete segment text, including role framing.
-- `tokenCount`: nonnegative integer, calculated using the declared tokenizer.
+- `content`: attribution text; stable content must match actual system messages.
+- `tokenCount`: nonnegative integer, retokenized by the harness from mapped wire fields.
 - Optional `sourceIds`: fixture turn/fact IDs for provenance.
+- `messageIndices` and/or `toolNames`: map every message and schema exactly once.
+
+`NativeModelResponse` preserves `content` (text, structured parts, or null),
+optional `toolCalls`, `finishReason`, and `usage: {promptTokens, completionTokens}`.
+Tool-only and text-plus-tool completions are valid. Proxy archives retain the full
+response beside the complete request; conversational answer extraction never
+turns native calls into text/JSON emulation. Provider keys remain environment-only
+and archives retain existing credential redaction.
+
+`python3 -m almm_adapter conformance` now exercises tool-only, text-plus-tool,
+tool-result follow-up, complete schema/call/result budget, and exact structured
+replay against ModelProxy/BudgetVerifier. `make smoke` runs the same five patterns
+before the ten-session fixture → harness → scorer → report pipeline.
 
 Every turn/probe returns all model requests made for that operation. The telemetry
 method includes every assembled attempt, even if its proxy call fails.
@@ -620,12 +649,24 @@ The stable prefix must remain unchanged within a run. Not every request needs
 all three tiers; there are no per-tier quotas.
 
 [`ReferenceAdapter`](almm_adapter/reference.py) accepts an injected
-`model_proxy(request) -> str` and `count_tokens(content) -> int`. It retains full
+`model_proxy(request) -> NativeModelResponse` and `count_tokens(content) -> int`. It retains full
 conversation history in memory and puts it in the unstable tier; it has no
 summary tier. This is an implementation example, not a scalable baseline.
 Actual runs must inject the harness proxy and declared tokenizer. The harness,
 not this adapter, enforces the 25,000-token ceiling on the complete request.
 Unbounded full-history requests will eventually fail that budget.
+
+### Native envelope cutover (BCH-015)
+
+Package and adapter contract 2.0 replace the segment-only 1.0 adapter interface;
+native envelope version is independently 1.0. Migrate adapter requests to
+`messages` plus mapped `tierSegments`, preserve native assistant/tool history,
+and consume structured proxy responses. Set both manifest version fields.
+Old string-returning proxies, segment-only requests, and answer-only checkpoints
+are not accepted; retain old immutable artifacts for their original harness.
+The reference adapter archives assistant tool calls but does not execute unknown
+runtime tools. Participating adapters execute their real native memory operations
+and send all follow-up/maintenance requests through the same proxy.
 
 Adapter input is an allowlisted projection: turns contain `turnId`, optional
 `sessionId`, `role: "user"`, and `text`; probes contain `probeId` and `question`.

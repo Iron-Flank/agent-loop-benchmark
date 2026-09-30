@@ -26,7 +26,7 @@ FAIL: contract version: Implement initialize(runManifest): validate contractVers
 ```
 
 After implementation, the same command must pass. Rename the project in
-`pyproject.toml` before distributing it. `almm-adapter==1.0.0` must be installed
+`pyproject.toml` before distributing it. `almm-adapter==2.0.0` must be installed
 from the benchmark checkout; this package is not assumed to exist on PyPI.
 
 ## Implement each method
