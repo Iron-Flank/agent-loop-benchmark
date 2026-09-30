@@ -6,6 +6,7 @@ import tempfile
 import time
 from unittest.mock import patch
 
+from almm_adapter.conformance import check_native_harness
 from almm_adapter.reference import ReferenceAdapter
 from almm_fixture.engine import canonical_json, generate
 from almm_report.__main__ import load_report
@@ -30,7 +31,9 @@ _PROVENANCE = 'synthetic smoke only; mock labels and judge, not human agreement'
 
 def _model_transport(payload):
     """Deterministic offline provider; not a benchmark model."""
-    return {'answer': 'I do not know.', 'modelVersion': 'offline-abstention-1'}
+    return {'content': 'I do not know.', 'finishReason': 'stop',
+            'usage': {'promptTokens': 0, 'completionTokens': 0},
+            'modelVersion': 'offline-abstention-1'}
 
 
 def _rows(path):
@@ -97,8 +100,10 @@ def smoke(output='artifacts/smoke'):
     output = Path(output)
     output.mkdir(parents=True, exist_ok=True)
     root = Path(tempfile.mkdtemp(prefix='smoke-', dir=output))
-    stage = 'fixture'
+    stage = 'native-conformance'
     try:
+        native_checks = check_native_harness()
+        stage = 'fixture'
         fixture = generate(42, _SESSIONS)
         fixture_path = root / 'fixture.json'
         fixture_path.write_bytes(canonical_json(fixture))
@@ -107,7 +112,8 @@ def smoke(output='artifacts/smoke'):
         _calibration(calibration)
         manifest = {
             'runId': 'ci-smoke-10',
-            'adapter': {'name': 'reference-offline-smoke', 'revision': '1', 'contractVersion': '1.0'},
+            'adapter': {'name': 'reference-offline-smoke', 'revision': '2', 'contractVersion': '2.0'},
+            'nativeModelEnvelopeVersion': '1.0',
             'model': {'provider': 'offline-smoke', 'name': 'abstention-mock',
                       'version': 'offline-abstention-1', 'decoding': {'temperature': 0},
                       'deterministic': True},
@@ -140,6 +146,7 @@ def smoke(output='artifacts/smoke'):
             raise ValueError(f'smoke: elapsed {elapsed:.6f}s must be below 120s')
         summary = {
             'canonical': False, 'calibrationProvenance': _PROVENANCE,
+            'nativeEnvelopeChecks': native_checks,
             'sessions': _SESSIONS, 'turns': _TURNS, 'probes': _PROBES, 'requests': _REQUESTS,
             'correctAbstentions': report['abstention']['correctAbstentions'],
             'falseAbstentions': report['abstention']['falseAbstentions'],

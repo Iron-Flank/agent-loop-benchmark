@@ -6,6 +6,7 @@ import threading
 import unittest
 from unittest.mock import patch
 
+from almm_adapter.native import canonical_wire
 from almm_fixture.engine import EVALUATION_SEED_START, adapter_view, generate
 from almm_harness.budget import BudgetVerifier
 from almm_harness.errors import AdapterFailure, ProviderFailure
@@ -15,7 +16,8 @@ from almm_harness.runner import FixtureRunner
 
 def manifest(run_id='harness-test'):
     return {'runId': run_id,
-            'adapter': {'name': 'compact-test', 'revision': 'abc123', 'contractVersion': '1.0'},
+            'adapter': {'name': 'compact-test', 'revision': 'abc123', 'contractVersion': '2.0'},
+            'nativeModelEnvelopeVersion': '1.0',
             'model': {'provider': 'local', 'name': 'test-model', 'version': 'immutable-1',
                       'decoding': {'temperature': 0}, 'seed': 42},
             'tokenizer': {'name': 'characters-smoke', 'version': '1'},
@@ -35,13 +37,23 @@ class CompactAdapter:
         self.sequence = 0
         self.answers = []
 
+    def assemble(self, text, source_id):
+        return {'requestId': f"{self.manifest['runId']}:{self.sequence}",
+                   'messages': [{'role': 'system', 'content': 'contract'},
+                                {'role': 'user', 'content': text}],
+                   'model': copy.deepcopy(self.manifest['model']),
+                   'decodingSettings': copy.deepcopy(self.manifest['model']['decoding']),
+                   'seed': self.manifest['model']['seed'],
+                   'tierSegments': [
+                       {'tier': 'stable', 'content': 'contract', 'tokenCount': 8,
+                        'messageIndices': [0]},
+                       {'tier': 'unstable', 'content': text, 'tokenCount': len(text),
+                        'messageIndices': [1], 'sourceIds': [source_id]}]}
+
     def respond(self, text, source_id, field):
         self.sequence += 1
-        request = {'requestId': f"{self.manifest['runId']}:{self.sequence}",
-                   'segments': [{'tier': 'stable', 'content': 'contract', 'tokenCount': 8},
-                                {'tier': 'unstable', 'content': text, 'tokenCount': len(text),
-                                 'sourceIds': [source_id]}]}
-        answer = self.proxy(request)
+        request = self.assemble(text, source_id)
+        answer = self.proxy(request)['content']
         self.answers.append(answer)
         return {field: answer, 'requests': [request]}
 
@@ -61,8 +73,10 @@ class CompactAdapter:
 
 def make_runner(directory, configuration=None, provider=None, adapter_class=CompactAdapter):
     configuration = configuration or manifest()
-    provider = provider or (lambda payload: {'answer': 'a raw model answer', 'inputTokens': 1,
-                                           'modelVersion': 'immutable-1'})
+    provider = provider or (lambda payload: {
+        'content': 'a raw model answer', 'finishReason': 'stop',
+        'usage': {'promptTokens': 1, 'completionTokens': 4},
+        'modelVersion': 'immutable-1'})
     proxy = ModelProxy(configuration, BudgetVerifier(configuration, len), provider)
     adapter = adapter_class(proxy)
     return FixtureRunner(configuration, adapter, proxy, directory), adapter, proxy
@@ -209,7 +223,7 @@ class HarnessTests(unittest.TestCase):
                 raise RuntimeError(
                     f'provider refused request; Authorization: Basic basic-private-value; '
                     f'x-api-key=header-private-value; environment={key}')
-            return {'answer': 'ok'}
+            return {'content': 'ok', 'finishReason': 'stop', 'usage': {'promptTokens': 0, 'completionTokens': 0}}
         provider.api_key_env = 'CUSTOM_PROVIDER_AUTH'
         with tempfile.TemporaryDirectory() as directory, patch.dict(
                 'os.environ', {'CUSTOM_PROVIDER_AUTH': key}):
@@ -271,10 +285,10 @@ class HarnessTests(unittest.TestCase):
         interrupted = False
         def provider(payload):
             nonlocal interrupted
-            if payload['request']['segments'][-1].get('sourceIds') == ['t-0051-03']:
+            if payload['request']['tierSegments'][-1].get('sourceIds') == ['t-0051-03']:
                 interrupted = True
                 raise KeyboardInterrupt('simulated process interruption')
-            return {'answer': 'ok'}
+            return {'content': 'ok', 'finishReason': 'stop', 'usage': {'promptTokens': 0, 'completionTokens': 0}}
         with tempfile.TemporaryDirectory() as directory:
             runner, _, _ = make_runner(directory, provider=provider)
             with self.assertRaises(KeyboardInterrupt):
@@ -286,7 +300,8 @@ class HarnessTests(unittest.TestCase):
             resumed_calls = []
             def resumed_provider(payload):
                 resumed_calls.append(payload['request']['requestId'])
-                return {'answer': 'different nondeterministic answer'}
+                return {'content': 'different nondeterministic answer', 'finishReason': 'stop',
+                        'usage': {'promptTokens': 0, 'completionTokens': 0}}
             resumed, adapter, _ = make_runner(directory, provider=resumed_provider)
             result = resumed.run(fixture, resume=True)
             self.assertEqual(adapter.turn_ids,
@@ -310,7 +325,9 @@ class HarnessTests(unittest.TestCase):
             def answerProbe(self, probe):
                 number = int(probe['probeId'].split('-')[1])
                 if number in (1, 2):
-                    return self.respond('x' * (24991 + number), probe['probeId'], 'answer')
+                    framing = len(canonical_wire(self.assemble('', probe['probeId'])))
+                    return self.respond('x' * (25000 - framing + number - 1),
+                                        probe['probeId'], 'answer')
                 return super().answerProbe(probe)
         with tempfile.TemporaryDirectory() as directory:
             runner, _, _ = make_runner(directory, adapter_class=Boundary)
@@ -330,9 +347,9 @@ class HarnessTests(unittest.TestCase):
     def test_corrupt_checkpoint_restarts_without_duplicate_outputs(self):
         fixture = generate(42, 10)
         def interrupted_provider(payload):
-            if payload['request']['segments'][-1].get('sourceIds') == ['t-0002-03']:
+            if payload['request']['tierSegments'][-1].get('sourceIds') == ['t-0002-03']:
                 raise KeyboardInterrupt()
-            return {'answer': 'ok'}
+            return {'content': 'ok', 'finishReason': 'stop', 'usage': {'promptTokens': 0, 'completionTokens': 0}}
         with tempfile.TemporaryDirectory() as directory:
             runner, _, _ = make_runner(directory, provider=interrupted_provider)
             with self.assertRaises(KeyboardInterrupt):
@@ -350,9 +367,9 @@ class HarnessTests(unittest.TestCase):
     def test_resume_rejects_changed_configuration_or_fixture(self):
         fixture = generate(42, 100)
         def provider(payload):
-            if payload['request']['segments'][-1].get('sourceIds') == ['t-0051-01']:
+            if payload['request']['tierSegments'][-1].get('sourceIds') == ['t-0051-01']:
                 raise KeyboardInterrupt()
-            return {'answer': 'ok'}
+            return {'content': 'ok', 'finishReason': 'stop', 'usage': {'promptTokens': 0, 'completionTokens': 0}}
         with tempfile.TemporaryDirectory() as directory:
             runner, _, _ = make_runner(directory, provider=provider)
             with self.assertRaises(KeyboardInterrupt):
@@ -396,7 +413,7 @@ class HarnessTests(unittest.TestCase):
         class Fabricated(CompactAdapter):
             def answerProbe(self, probe):
                 result = super().answerProbe(probe)
-                result['requests'][0]['segments'][-1]['content'] = 'not the model input'
+                result['requests'][0]['tierSegments'][-1]['content'] = 'not the model input'
                 return result
         with tempfile.TemporaryDirectory() as directory:
             runner, _, _ = make_runner(directory, adapter_class=Fabricated)

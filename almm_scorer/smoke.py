@@ -20,16 +20,26 @@ class _Adapter:
         self.proxy = proxy
 
     def initialize(self, manifest):
+        self.manifest = manifest
         self.prefix = manifest['stablePrefix'][0]
         self.sequence = 0
         self.turns = []
 
-    def _respond(self, text, field):
+    def _respond(self, text, field, source_ids=None):
         self.sequence += 1
-        request = {'requestId': str(self.sequence), 'segments': [
-            {'tier': 'stable', 'content': self.prefix, 'tokenCount': len(self.prefix)},
-            {'tier': 'unstable', 'content': text, 'tokenCount': len(text)}]}
-        answer = self.proxy(request)
+        request = {'requestId': str(self.sequence),
+                   'messages': [{'role': 'system', 'content': self.prefix},
+                                {'role': 'user', 'content': text}],
+                   'model': self.manifest['model'],
+                   'decodingSettings': self.manifest['model']['decoding'],
+                   'tierSegments': [
+                       {'tier': 'stable', 'content': self.prefix,
+                        'tokenCount': len(self.prefix), 'messageIndices': [0]},
+                       {'tier': 'unstable', 'content': text,
+                        'tokenCount': len(text), 'messageIndices': [1]}]}
+        if source_ids is not None:
+            request['tierSegments'][-1]['sourceIds'] = source_ids
+        answer = self.proxy(request)['content']
         return {field: answer, 'requests': [request]}
 
     def handleTurn(self, turn):
@@ -136,14 +146,16 @@ def smoke():
                                    'version': 'offline-judge-1', 'rubricVersion': '1.0',
                                    'endpoint': f'http://127.0.0.1:{server.server_port}/v1/chat/completions'},
                                   transport=urlopen)
-            manifest = {'runId': 'scoring-smoke', 'adapter': {'name': 'smoke', 'revision': '1', 'contractVersion': '1.0'},
+            manifest = {'runId': 'scoring-smoke', 'adapter': {'name': 'smoke', 'revision': '2', 'contractVersion': '2.0'},
+                        'nativeModelEnvelopeVersion': '1.0',
                         'model': {'provider': 'offline-smoke', 'name': 'offline', 'version': '1',
                                   'decoding': {'temperature': 0}},
                         'tokenizer': {'name': 'characters-smoke', 'version': '1'},
                         'stablePrefix': ['ALMM smoke'], 'seed': 42, 'scorerVersion': 'unscored-1',
                         'rateLimitRpm': 1000000, 'probeTimeoutSeconds': 10}
             proxy = ModelProxy(manifest, BudgetVerifier(manifest, len),
-                               lambda payload: {'answer': 'I do not know.'})
+                               lambda payload: {'content': 'I do not know.', 'finishReason': 'stop',
+                                                'usage': {'promptTokens': 0, 'completionTokens': 0}})
             adapter = _Adapter(proxy)
             fixture = generate(42, 10)
             semantic = next(p for p in fixture['probes'] if p['expected']['matchType'] == 'exact')

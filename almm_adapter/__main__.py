@@ -30,7 +30,7 @@ def smoke(adapter):
     requests = adapter.getRequestTelemetry()
     if len(requests) != 20:
         raise ValueError('smoke: expected 20 requests across 10 sessions')
-    if not any('ALMM-42' in s['content'] for s in requests[-1]['segments']):
+    if not any('ALMM-42' in str(message['content']) for message in requests[-1]['messages']):
         raise ValueError('smoke: reference adapter lost session-1 context')
     return {'sessions': 10, 'requests': len(requests), 'crossSessionContext': 'preserved',
             'model': 'offline-smoke', 'tokenizer': 'character-count (not model tokens)',

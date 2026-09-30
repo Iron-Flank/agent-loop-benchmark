@@ -31,7 +31,9 @@ class ProcessAdapterTests(unittest.TestCase):
         cls.process.communicate(timeout=5)
 
     def test_remote_conformance(self):
-        self.assertEqual(check_adapter(HttpAdapter(self.url))[-1], 'state reset')
+        checks = check_adapter(HttpAdapter(self.url))
+        self.assertIn('state reset', checks)
+        self.assertIn('native exact replay', checks)
 
     def test_remote_missing_version_rejected(self):
         manifest = sample_manifest()

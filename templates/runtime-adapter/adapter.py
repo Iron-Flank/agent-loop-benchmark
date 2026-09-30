@@ -1,5 +1,5 @@
-"""Copy this project and implement RuntimeAdapter 1.0 for your runtime."""
-from almm_adapter.contract import (ModelRequest, Probe, ProbeResult, RunManifest,
+"""Copy this project and implement RuntimeAdapter 2.0 for your runtime."""
+from almm_adapter.contract import (NativeModelRequest, Probe, ProbeResult, RunManifest,
                                    Turn, TurnResult)
 
 
@@ -13,7 +13,7 @@ class Adapter:
     def answerProbe(self, probe: Probe) -> ProbeResult:
         raise NotImplementedError('Implement answerProbe(probe): return answer plus tiered requests; never accept gold records')
 
-    def getRequestTelemetry(self) -> list[ModelRequest]:
+    def getRequestTelemetry(self) -> list[NativeModelRequest]:
         raise NotImplementedError('Implement getRequestTelemetry(): return an independent snapshot of every assembled request')
 
 

@@ -90,7 +90,7 @@ def _distance(probe, sessions, introductions):
 def _retrieval(probe, requests, turns):
     sources, reported = set(), False
     for request in requests:
-        for segment in request.get('segments', []):
+        for segment in request.get('tierSegments', []):
             if 'sourceIds' not in segment:
                 continue
             reported = True
