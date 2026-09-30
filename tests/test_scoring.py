@@ -105,12 +105,12 @@ class ScoringTests(unittest.TestCase):
             self.assertTrue(all(not row['eligibleForAccuracy'] for row in rows))
 
     def test_numeric_and_semantic_fixture_gold_supported(self):
-        fixture = generate(42, 10)
+        from test_fixture_validation import valid_fixture
+        fixture = valid_fixture()
         probe = next(p for p in fixture['probes'] if p['expected']['matchType'] == 'exact')
         fact = next(f for f in fixture['facts'] if f['factId'] == probe['expected']['requiredFactIds'][0])
         fact['value'] = '12.5'
         probe['expected'].update(matchType='numeric', acceptedAnswers=['12.5'], tolerance=0.5)
-        fixture.pop('contentHash')
         SchemaValidator.validate(fixture)
         probe['expected']['tolerance'] = -1
         with self.assertRaisesRegex(ValueError, 'tolerance'):

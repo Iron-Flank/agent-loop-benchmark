@@ -11,7 +11,7 @@ from almm_scorer.semantic import SemanticJudge
 
 
 CONFIG = {'provider': 'openai-compatible', 'model': 'judge-snapshot',
-          'version': '2031-01-01', 'rubricVersion': 'almm-1.0'}
+          'version': 'judge-snapshot-2031', 'rubricVersion': 'almm-1.0'}
 PROBE = {'question': 'What are the visit arrangements?', 'answerability': True,
          'expected': {'matchType': 'semantic', 'rubric': 'Every claim, no contradictions.',
                       'requiredClaims': ['Visit on June 18.', 'Keys at reception.'],
@@ -28,7 +28,7 @@ def envelope(output, model='judge-snapshot-2031'):
 class SemanticJudgeTests(unittest.TestCase):
     def setUp(self):
         self.environment = patch.dict(os.environ, {'ALMM_JUDGE_API_KEY': 'judge-secret-value',
-                                                   'ALMM_MODEL_API_KEY': 'runtime-secret-value'})
+                                                   'OPENAI_API_KEY': 'runtime-secret-value'})
         self.environment.start()
         self.addCleanup(self.environment.stop)
 
@@ -68,7 +68,8 @@ class SemanticJudgeTests(unittest.TestCase):
 
     def test_actual_model_pinned_and_change_rejected(self):
         responses = iter([envelope(VALID, 'actual-001'), envelope(VALID, 'actual-002')])
-        judge = SemanticJudge(CONFIG, transport=lambda request, timeout: next(responses))
+        judge = SemanticJudge({**CONFIG, 'resolvedModel': 'actual-001'},
+                              transport=lambda request, timeout: next(responses))
         judge.score(PROBE, 'First')
         self.assertEqual(judge.config['resolvedModel'], 'actual-001')
         with self.assertRaisesRegex(ValueError, 'model'):
@@ -77,6 +78,10 @@ class SemanticJudgeTests(unittest.TestCase):
                                transport=lambda request, timeout: envelope(VALID, 'actual-002'))
         with self.assertRaisesRegex(ValueError, 'model'):
             pinned.score(PROBE, 'Candidate')
+        unexpected = SemanticJudge(CONFIG,
+                                   transport=lambda request, timeout: envelope(VALID, 'unexpected'))
+        with self.assertRaisesRegex(ValueError, 'model'):
+            unexpected.score(PROBE, 'First response must match pin')
 
     def test_missing_completion_content_never_falls_back_to_exact_gold(self):
         for response in ({}, {'choices': []},
@@ -102,7 +107,7 @@ class SemanticJudgeTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaisesRegex(ValueError, 'secret|key'):
                 SemanticJudge({**CONFIG, field: 'private'})
         with self.assertRaisesRegex(ValueError, 'isolat|runtime'):
-            SemanticJudge({**CONFIG, 'keyEnv': 'ALMM_MODEL_API_KEY'})
+            SemanticJudge({**CONFIG, 'keyEnv': 'OPENAI_API_KEY'})
         with patch.dict(os.environ, {'ALMM_JUDGE_API_KEY': 'runtime-secret-value'}):
             with self.assertRaisesRegex(ValueError, 'isolat|runtime'):
                 self.judge().score(PROBE, 'Candidate')
@@ -112,7 +117,8 @@ class SemanticJudgeTests(unittest.TestCase):
 
     def test_secrets_are_redacted_recursively_and_in_transport_errors(self):
         output = {**VALID, 'reasoning': 'judge-secret-value runtime-secret-value',
-                  'nested': {'apiKey': 'another-secret', 'text': 'judge-secret-value'}}
+                  'nested': {'apiKey': 'another-secret', 'text': 'judge-secret-value',
+                             'judge-secret-value': 'echoed secret in a JSON property name'}}
         judge = self.judge(output)
         result = judge.score(PROBE, 'runtime-secret-value')
         serialized = json.dumps(result) + json.dumps(judge.config)
