@@ -2,8 +2,8 @@
 
 ALMM measures runtime memory quality as conversation histories accumulate.
 This checkout supplies the **RuntimeAdapter 1.0 contract**, deterministic fixture
-generator, core execution harness, and versioned scoring pipeline. Participating
-runtimes are separate tasks. Offline smoke responses are not canonical benchmark
+generator, core execution harness, versioned scoring pipeline, and immutable reports.
+Participating runtimes are separate tasks. Offline smoke responses are not canonical benchmark
 answers or a claim of model accuracy.
 
 ## Frozen scorer calibration content
@@ -192,11 +192,12 @@ python3 -m almm_scorer --fixture /private/full-fixture.json \
 
 `ScoringPipeline` reuses fixture validation, manifest identity checks and the
 declared tokenizer to retokenize **every** archived request before calibration or
-scoring. Forged counts, changed stable prefixes, missing/revised identities and
-requests above 25,000 tokens halt scoring. Turn-request payloads are streamed,
-retaining compact request hashes rather than full turn contexts. Archived budget
-failures also halt this strict scoring preflight; valid provider/adapter/timeout
-failures and unattempted probes remain incomplete, outside the accuracy denominator.
+scoring. Forged counts, changed stable prefixes and missing/revised identities halt
+scoring. Turn-request payloads are streamed, retaining compact request hashes
+rather than full turn contexts. Requests above 25,000 tokens are publishable only
+when archived as rejected budget failures with matching retokenized telemetry.
+Budget, provider, adapter and timeout failures, plus unattempted probes, remain
+outside the accuracy denominator.
 Character-count tokenization is smoke-only and cannot produce canonical results.
 
 Deterministic types make no judge calls: exact whole-answer normalization,
@@ -244,6 +245,84 @@ their artifact `scorerHash`; reapply that revision to the original run directory
 for longitudinal rescoring. New versions must not remove old artifacts, fixtures
 or calibration sets.
 
+
+## Immutable reports and degradation curves
+
+```sh
+python3 -m almm_report --smoke
+python3 -m almm_report --fixture /private/full-fixture.json \
+  --run /artifacts/finalized-run-directory \
+  --scores /artifacts/scored/source-hash/scorer-identity \
+  --output /artifacts/reports
+python3 -m almm_report --reports /artifacts/reports/hash-at-10 \
+  /artifacts/reports/hash-at-100 /artifacts/reports/hash-at-500 \
+  /artifacts/reports/hash-at-1000 --output /artifacts/curves
+```
+
+The offline reporting smoke executes all four session scales through the actual
+runner, calibrated scorer and writer, verifies idempotent publication, and plots
+the full curve. Its provider/judge and calibration labels are synthetic; output
+is noncanonical, not a claim of grader-human agreement or runtime quality.
+The installed equivalent command is `almm-report`.
+
+`ReportWriter.write(fixture, run_directory, scorer_directory, output_root)`
+revalidates the runner archive and scorer/source identities without rescoring.
+Publication uses the SHA-256 of the **complete final manifest bytes**:
+
+```text
+<output>/<manifest-sha256>/
+  manifest.json
+  probes.jsonl
+  requests.jsonl
+  scores.jsonl
+  report.json
+```
+
+Original archives remain untouched. Identical archived inputs return the same
+directory and byte-identical files. Independent executions retain their observed
+timestamps, latencies and answers, so they have different manifest hashes even
+with identical model settings. Files are read-only; exclusive atomic directory
+publication never replaces an existing identity. Replay verifies every existing
+file hash, size and permissions; corruption fails instead of overwriting.
+Exclusive publication supports macOS, Linux and Windows.
+
+The report manifest retains fixture/harness/adapter/scorer identities, pinned
+model/decoding/tokenizer settings, seeds, calibration/judge identities, and every
+request's tier totals. It adds session count, concurrency, elapsed wall time from
+archived events, requests/second, interruption/resume history, artifact hashes,
+and exact artifact bytes **including the manifest itself**. Execution configuration
+accepts `concurrency: {"mode": "solo", "factor": 1}` (default) or
+`{"mode": "concurrent", "factor": N}`; this records deployment concurrency, not
+within-fixture parallelism. Declare `model.deterministic` and
+`model.versionPinned` only when the provider guarantees them. Missing guarantees
+are recorded as unknown, never inferred from a model version string.
+Footprints above 5,000,000,000 bytes produce a manifest warning, not invalidation.
+
+`report.json` keeps accuracy (`correct / answered`) and completion
+(`answered / total`) distinct. Undefined ratios are JSON `null`. Accuracy
+breakdowns include ability, session distance, evidence cardinality and fixture ID;
+no composite winner score is produced. Correct abstentions, unsupported answers
+on unanswerable probes, and false abstentions on answerable probes have separate
+counts/rates. Operational telemetry separately reports request/probe latencies,
+request count, budget failures, provider/adapter/timeout incompletes and unattempted
+probes. More than 5% incomplete probes flags investigation.
+
+Token efficiency includes all assembled requests (turns, probes and failures):
+mean/nearest-rank p95 tokens, tier totals/proportions, overhead, and
+`accuracy / mean request input tokens * 1000`. Local storage is not scored.
+Provenance maps retrieved fact IDs and turn introduction/reference IDs to gold
+facts. Missing provenance is `not-reported` with null precision/recall; partial
+coverage exposes explicitly labelled subset means, not a misleading full-run mean.
+
+Curve publication emits content-addressed `curves.json` and `curves.svg`.
+Solid accuracy and dashed completion lines use the four session scales; missing
+answers/scales leave gaps. Each observed run remains a distinct point with its
+operational/token/retrieval diagnostics. Incompatible configurations are separate
+series. Non-deterministic or unknown providers retain repeated-run values and
+population variance separately; one run reports variance unavailable.
+`comparability(manifest_a, manifest_b)` checks complete valid manifests and the
+pinned fixture/harness/adapter/model/tokenizer/scorer/judge/calibration/seed/concurrency
+identity, not execution timestamps, run IDs or elapsed time.
 
 ## Quick start
 

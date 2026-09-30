@@ -125,6 +125,11 @@ class FixtureRunner:
         if (isinstance(timeout, bool) or not isinstance(timeout, (int, float))
                 or not math.isfinite(timeout) or timeout <= 0):
             raise ValueError('probeTimeoutSeconds must be positive and finite')
+        concurrency = self.manifest.setdefault('concurrency', {'mode': 'solo', 'factor': 1})
+        if (not isinstance(concurrency, dict) or concurrency.get('mode') not in {'solo', 'concurrent'}
+                or type(concurrency.get('factor')) is not int or concurrency['factor'] < 1
+                or (concurrency['mode'] == 'solo' and concurrency['factor'] != 1)):
+            raise ValueError('concurrency requires solo/factor 1 or concurrent/positive integer factor')
         self.probes = ProbeRunner(adapter, proxy, timeout)
         self._handles = {}
         self._redact = proxy.redact
@@ -260,7 +265,7 @@ class FixtureRunner:
         if 'contentHash' in fixture and fixture['contentHash'] != fixture_hash:
             raise ValueError('fixture contentHash does not match fixture content')
         configuration = {key: deepcopy(self.manifest[key]) for key in (
-            'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix', 'seed', 'scorerVersion')}
+            'runId', 'adapter', 'model', 'tokenizer', 'stablePrefix', 'seed', 'scorerVersion', 'concurrency')}
         configuration.update(harnessHash=_harness_hash(), fixtureHash=fixture_hash,
                              rateLimitRpm=self.manifest.get('rateLimitRpm', 60),
                              probeTimeoutSeconds=self.manifest.get('probeTimeoutSeconds', 60))
