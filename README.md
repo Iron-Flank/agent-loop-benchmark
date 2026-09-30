@@ -80,11 +80,10 @@ have `answerability: false`, no gold factual evidence, and an abstention answer.
 The validator rejects malformed IDs/references, unresolved supersession,
 premature probes, and ledger-inconsistent answers before any output is created.
 
-**BCH-013 ac-2 is blocked by the specified bound:** in exactly 1000 sessions,
-the maximum prior-session distance is 999, not 1000. The generator honestly
-covers distances 10, 100, 500, and 999; it does not relabel 999 as 1000 or add
-a hidden session. A human must authorize a 1001-session fixture, a separate
-prelude, or a corrected distance before the task can pass this criterion.
+Cross-session probes cover distances 10, 100, 500, and 999. The maximum
+prior-session distance within exactly 1000 sessions is 999: a fact introduced
+in session 1 and probed after session 1000. No extra prelude session or
+distance relabeling is used.
 
 ### Held-out isolation
 
