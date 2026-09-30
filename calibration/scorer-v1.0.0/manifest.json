@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "calibration-manifest-1.0",
+  "calibrationSetId": "almm-calibration-1.0.0",
+  "calibrationSetVersion": "1.0.0",
+  "retainedWithScorerVersion": "1.0.0",
+  "scorerVersionStatus": "Reserved for BCH-007; no scorer implementation or 95% agreement claim is made by this content task.",
+  "frozenAt": "2026-09-30T01:56:16Z",
+  "files": {
+    "probes.json": "b881d3a250edcfbba967015bd4d2ff36a284b5d7a1ec41b569e584d6b2f14430",
+    "review.json": "d2940dae4ff15c9ce275d4bf5ee622db9b1c58933b0ab033cc83ba9441ac5499"
+  },
+  "freezePolicy": "Never edit or regenerate the frozen probes or gold labels when changing a scorer. Retain this set and review with scorer 1.0.0. New scorers reference the same frozen labels. Corrections require an additive calibration-set version; preserve the old files and their scorer associations.",
+  "expectedRecordContract": "Calibration-only evidence envelopes, not canonical replay fixtures. Each probe owns a small independently authored evidence fixture and its gold expected record. Core expected fields match fixture records; semantic and numeric extensions cover match types declared in the initiative but not emitted by generator 1.0.0.",
+  "requiredAgreement": 0.95,
+  "gateOwner": "BCH-007"
+}
