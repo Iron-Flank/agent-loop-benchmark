@@ -112,11 +112,11 @@ class ReportWriterTests(unittest.TestCase):
             fixture = generate(42, 10)
             configuration = runner_manifest()
             configuration['model']['deterministic'] = True
+            configuration['concurrency'] = {'mode': 'concurrent', 'factor': 4}
             runner, _, _ = make_runner(Path(root) / 'runs', configuration)
             source = Path(runner.run(fixture)['artifactDir'])
             manifest = json.loads((source / 'manifest.json').read_text())
-            manifest['concurrency'] = {'mode': 'parallel', 'factor': 4}
-            rewrite(source / 'manifest.json', manifest)
+            self.assertEqual(manifest['concurrency'], configuration['concurrency'])
             scored = score_archive(fixture, source, root)
             result = ReportWriter().write(fixture, source, scored, Path(root) / 'reports')
             self.assertEqual(result['manifest']['concurrency'], manifest['concurrency'])
